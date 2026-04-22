@@ -1,99 +1,154 @@
-"use client";
+﻿"use client";
 
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Code2, Lightbulb, Rocket } from "lucide-react";
+import { Code2, Lightbulb, Rocket, Layers, TestTube2, Globe } from "lucide-react";
+import { useI18n } from "@/app/contexts/i18n-context";
 
-const highlights = [
-  {
-    icon: <Code2 size={24} />,
-    title: "Código limpo",
-    desc: "Componentização, escalabilidade e boas práticas em cada projeto.",
-  },
-  {
-    icon: <Lightbulb size={24} />,
-    title: "Mentalidade de produto",
-    desc: "Foco em UX, performance e entregas que geram valor real.",
-  },
-  {
-    icon: <Rocket size={24} />,
-    title: "Entrega contínua",
-    desc: "Atuação ágil, comunicação constante e deploys frequentes.",
-  },
-];
+const traits = [
+  { icon: Code2,     title: "Clean Code",  desc: "Componentizacao, escalabilidade e boas praticas.",       color: "var(--color-primary)"   },
+  { icon: Lightbulb, title: "UX Focus",    desc: "Interfaces intuitivas centradas no usuario.",             color: "var(--color-secondary)" },
+  { icon: Rocket,    title: "Performance", desc: "Score 98+ no Lighthouse, Core Web Vitals.",               color: "var(--color-accent)"    },
+  { icon: Layers,    title: "Fullstack",   desc: "Frontend e backend integrados sem friccao.",               color: "var(--color-primary)"   },
+  { icon: TestTube2, title: "Testes",      desc: "Jest, TDD e fluxo de entrega continua.",                  color: "var(--color-secondary)" },
+  { icon: Globe,     title: "Freelancer",  desc: "Sites, landing pages e sistemas sob demanda.",             color: "var(--color-accent)"    },
+] as const;
 
 export default function About() {
+  const { t } = useI18n();
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
+  const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section id="sobre" className="py-24 md:py-32">
-      <div ref={ref} className="mx-auto max-w-6xl px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
-        >
-          <span className="text-sm font-medium text-[var(--color-primary-light)]">
-            Sobre mim
-          </span>
-          <h2 className="mt-2 text-3xl md:text-4xl font-bold">
-            Quem está por trás do código
-          </h2>
-        </motion.div>
+    <section id="sobre" className="relative py-24 md:py-32 bg-[var(--color-background)]">
+      <div
+        className="absolute top-0 inset-x-0 h-px"
+        style={{ background: "linear-gradient(to right, transparent, var(--color-border) 30%, var(--color-border) 70%, transparent)" }}
+      />
 
-        <div className="mt-12 grid gap-12 md:grid-cols-2">
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="space-y-5 text-[var(--color-muted)] leading-relaxed"
-          >
-            <p>
-              Sou desenvolvedor <strong className="text-[var(--color-foreground)]">Fullstack com foco em Frontend</strong>, 
-              apaixonado por criar interfaces que combinam performance, estética e usabilidade.
-            </p>
-            <p>
-              Tenho experiência sólida com <strong className="text-[var(--color-foreground)]">Next.js, Angular, Node.js e PHP</strong>, 
-              atuando na integração entre frontend e backend, consumo de APIs, interfaces dinâmicas 
-              e responsivas, e validações complexas como CPF/CNPJ e formulários dinâmicos.
-            </p>
-            <p>
-              Trabalho com <strong className="text-[var(--color-foreground)]">Styled Components, Material UI, Chakra UI</strong> e 
-              domino ferramentas de animação como <strong className="text-[var(--color-foreground)]">GSAP + ScrollTrigger</strong> e 
-              manipulação avançada de SVG. Testes com Jest fazem parte do meu fluxo.
-            </p>
-            <p>
-              Atuo em ambientes ágeis com entrega contínua e comunicação constante entre times. 
-              Também realizo <strong className="text-[var(--color-foreground)]">freelancers de criação de sites e landing pages</strong>.
-            </p>
-          </motion.div>
+      <div ref={ref} className="mx-auto max-w-7xl px-8 md:px-14">
+        <div className="grid lg:grid-cols-[1fr_1.1fr] gap-14 lg:gap-20 items-start">
 
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.3 }}
-            className="grid gap-6"
-          >
-            {highlights.map((item, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 transition-colors hover:border-[var(--color-primary)]/40"
-              >
-                <div className="mt-1 rounded-lg bg-[var(--color-primary)]/10 p-2.5 text-[var(--color-primary-light)]">
-                  {item.icon}
+          {/* LEFT */}
+          <div>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.7 }}
+            >
+              <div className="flex items-center gap-3 mb-5">
+                <div className="h-px w-8 bg-[var(--color-primary)]" />
+                <span className="text-[11px] font-mono tracking-[0.3em] text-[var(--color-primary)] uppercase">
+                  {t.about.label}
+                </span>
+              </div>
+              <h2 className="font-black leading-tight tracking-tight">
+                <span
+                  className="block text-[var(--color-foreground)]"
+                  style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
+                >
+                  {t.about.title1}
+                </span>
+                <span
+                  className="block bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] bg-clip-text text-transparent"
+                  style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
+                >
+                  {t.about.title2}
+                </span>
+              </h2>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              className="mt-8 space-y-4 text-[var(--color-muted)] leading-relaxed text-sm md:text-base"
+            >
+              <p>{t.about.p1}</p>
+              <p>{t.about.p2}</p>
+              <p>{t.about.p4}</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.35 }}
+              className="mt-8 border border-[var(--color-border)] rounded-2xl overflow-hidden bg-[var(--color-card)]"
+            >
+              <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-[var(--color-border)] bg-[var(--color-background)]/50">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
+                <span className="ml-3 text-[10px] font-mono text-[var(--color-muted)] tracking-wider">
+                  profile.ts
+                </span>
+              </div>
+              <div className="px-5 py-4 text-xs font-mono leading-loose overflow-x-auto">
+                <div>
+                  <span className="text-[var(--color-muted)]">const </span>
+                  <span className="text-[var(--color-primary)]">dev</span>
+                  <span className="text-[var(--color-muted)]"> = {"{"}</span>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-[var(--color-foreground)]">
-                    {item.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-[var(--color-muted)]">
-                    {item.desc}
-                  </p>
+                  <span className="text-[var(--color-muted)]">{"  role:      "}</span>
+                  <span className="text-[var(--color-accent)]">&quot;Fullstack Developer&quot;</span>
+                  <span className="text-[var(--color-muted)]">,</span>
+                </div>
+                <div>
+                  <span className="text-[var(--color-muted)]">{"  focus:     "}</span>
+                  <span className="text-[var(--color-accent)]">&quot;Frontend + Performance&quot;</span>
+                  <span className="text-[var(--color-muted)]">,</span>
+                </div>
+                <div>
+                  <span className="text-[var(--color-muted)]">{"  xp:        "}</span>
+                  <span className="text-[var(--color-accent)]">&quot;3+ years&quot;</span>
+                  <span className="text-[var(--color-muted)]">,</span>
+                </div>
+                <div>
+                  <span className="text-[var(--color-muted)]">{"  available: "}</span>
+                  <span className="text-green-400">true</span>
+                </div>
+                <div>
+                  <span className="text-[var(--color-muted)]">{"}"}</span>
                 </div>
               </div>
-            ))}
+            </motion.div>
+          </div>
+
+          {/* RIGHT - trait cards */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.15 }}
+            className="grid grid-cols-2 gap-4"
+          >
+            {traits.map((trait, i) => {
+              const Icon = trait.icon;
+              return (
+                <motion.div
+                  key={trait.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={inView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
+                  className="group relative flex flex-col gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 transition-all duration-300 hover:-translate-y-0.5 overflow-hidden"
+                >
+                  <div
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl"
+                    style={{ background: `radial-gradient(ellipse at 20% 20%, ${trait.color}18 0%, transparent 65%)` }}
+                  />
+                  <div
+                    className="inline-flex w-10 h-10 items-center justify-center rounded-xl"
+                    style={{ background: `${trait.color}18`, color: trait.color }}
+                  >
+                    <Icon size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-[var(--color-foreground)]">{trait.title}</h3>
+                    <p className="mt-1 text-xs text-[var(--color-muted)] leading-relaxed">{trait.desc}</p>
+                  </div>
+                </motion.div>
+              );
+            })}
           </motion.div>
         </div>
       </div>
