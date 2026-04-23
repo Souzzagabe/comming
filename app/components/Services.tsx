@@ -34,7 +34,7 @@ export default function Services() {
       <div className="absolute top-0 inset-x-0 h-px"
         style={{ background: "linear-gradient(to right, transparent, var(--color-border) 30%, var(--color-border) 70%, transparent)" }} />
 
-      <div ref={ref} className="mx-auto max-w-7xl px-8 md:px-14">
+      <div ref={ref} className="mx-auto max-w-7xl px-4 sm:px-8 md:px-14">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}

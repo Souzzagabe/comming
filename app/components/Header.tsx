@@ -59,7 +59,7 @@ export default function Header() {
             alt="Logo"
             width={180}
             height={54}
-            className="h-14 w-auto object-contain"
+            className="h-9 sm:h-11 md:h-14 w-auto object-contain"
             priority
           />
         </a>

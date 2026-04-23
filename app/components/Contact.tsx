@@ -50,7 +50,7 @@ export default function Contact() {
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--color-primary)]/30 to-transparent" />
       </div>
 
-      <div ref={ref} className="mx-auto max-w-7xl px-6">
+      <div ref={ref} className="mx-auto max-w-7xl px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -66,11 +66,11 @@ export default function Contact() {
           <p className="mt-4 text-[var(--color-muted)] max-w-xl">{t.contact.description}</p>
         </motion.div>
 
-        <div className="mt-14 grid gap-12 lg:grid-cols-5">
+        <div className="mt-10 grid gap-8 lg:gap-12 lg:grid-cols-5">
           <motion.form
             onSubmit={handleSubmit}
-            initial={{ opacity: 0, x: -40 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.2 }}
             className="lg:col-span-3 space-y-5"
           >
@@ -139,8 +139,8 @@ export default function Contact() {
           </motion.form>
 
           <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.3 }}
             className="lg:col-span-2 space-y-6"
           >

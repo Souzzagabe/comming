@@ -26,7 +26,7 @@ export default function About() {
         style={{ background: "linear-gradient(to right, transparent, var(--color-border) 30%, var(--color-border) 70%, transparent)" }}
       />
 
-      <div ref={ref} className="mx-auto max-w-7xl px-8 md:px-14">
+      <div ref={ref} className="mx-auto max-w-7xl px-4 sm:px-8 md:px-14">
         <div className="grid lg:grid-cols-[1fr_1.1fr] gap-14 lg:gap-20 items-start">
 
           {/* LEFT */}
@@ -73,10 +73,10 @@ export default function About() {
 
           {/* RIGHT - trait cards */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.15 }}
-            className="grid grid-cols-2 gap-4"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
           >
             {traits.map((trait, i) => {
               const Icon = trait.icon;

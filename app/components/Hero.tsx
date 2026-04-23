@@ -85,7 +85,7 @@ export default function Hero() {
         </div>
 
         {/* LEFT — text content */}
-        <div className="relative z-10 flex flex-col justify-center min-h-screen px-8 md:px-14 lg:px-20 xl:px-28 py-28 lg:w-[54%]">
+        <div className="relative z-10 flex flex-col justify-center min-h-screen px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 pt-24 pb-16 md:py-28 lg:w-[54%]">
           <motion.div
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -105,14 +105,14 @@ export default function Hero() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="font-black leading-[1.0] tracking-tight"
+            className="font-black leading-[1.05] tracking-tight"
           >
-            <span className="block text-[var(--color-foreground)]" style={{ fontSize: "clamp(2.5rem, 5vw, 4.5rem)" }}>
+            <span className="block text-[var(--color-foreground)]" style={{ fontSize: "clamp(2rem, 4vw, 4rem)" }}>
               {t.hero.title1}
             </span>
             <span
               className="block bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] bg-clip-text text-transparent"
-              style={{ fontSize: "clamp(2.5rem, 5vw, 4.5rem)" }}
+              style={{ fontSize: "clamp(2rem, 4vw, 4rem)" }}
             >
               {t.hero.title2}
             </span>
