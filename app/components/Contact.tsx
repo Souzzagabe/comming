@@ -168,7 +168,7 @@ export default function Contact() {
                   <Clock size={20} />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-sm">Response time</h4>
+                  <h4 className="font-semibold text-sm">{t.contact.response_time_label}</h4>
                   <p className="text-sm text-[var(--color-muted)]">{t.contact.response_time}</p>
                 </div>
               </div>

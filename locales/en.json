@@ -56,12 +56,12 @@
     "view_demo": "Demo"
   },
   "services": {
-    "label": "03 / Services",
+    "label": "02 / Services",
     "title": "What I can do for you",
     "s1_title": "Web Development",
     "s1_desc": "Websites, systems and landing pages with Next.js, React and Angular.",
-    "s2_title": "UI/UX Design",
-    "s2_desc": "Modern, responsive interfaces focused on user experience.",
+    "s2_title": "Microfrontend",
+    "s2_desc": "Scalable micro frontend architecture with Module Federation and React.",
     "s3_title": "APIs & Integrations",
     "s3_desc": "Development and integration of RESTful APIs with Node.js and PHP.",
     "s4_title": "Performance",
@@ -72,8 +72,8 @@
     "s6_desc": "Code review, project architecture and best practices."
   },
   "contact": {
-    "label": "04 / Contact",
-    "title": "Let's work together?",
+    "label": "03 / Contact",
+    "title": "Want to work together?",
     "description": "Have a project in mind? Get in touch and let's turn your idea into reality.",
     "name": "Name",
     "name_placeholder": "Your name",
@@ -86,6 +86,7 @@
     "send": "Send message",
     "sending": "Sending...",
     "success": "Message sent! I'll get back to you soon.",
+    "response_time_label": "Response time",
     "location": "Brazil — Porto Alegre, RS",
     "response_time": "Response within 24h"
   },

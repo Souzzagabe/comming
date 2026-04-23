@@ -69,50 +69,6 @@ export default function About() {
               <p>{t.about.p4}</p>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.35 }}
-              className="mt-8 border border-[var(--color-border)] rounded-2xl overflow-hidden bg-[var(--color-card)]"
-            >
-              <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-[var(--color-border)] bg-[var(--color-background)]/50">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
-                <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
-                <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
-                <span className="ml-3 text-[10px] font-mono text-[var(--color-muted)] tracking-wider">
-                  profile.ts
-                </span>
-              </div>
-              <div className="px-5 py-4 text-xs font-mono leading-loose overflow-x-auto">
-                <div>
-                  <span className="text-[var(--color-muted)]">const </span>
-                  <span className="text-[var(--color-primary)]">dev</span>
-                  <span className="text-[var(--color-muted)]"> = {"{"}</span>
-                </div>
-                <div>
-                  <span className="text-[var(--color-muted)]">{"  role:      "}</span>
-                  <span className="text-[var(--color-accent)]">&quot;Fullstack Developer&quot;</span>
-                  <span className="text-[var(--color-muted)]">,</span>
-                </div>
-                <div>
-                  <span className="text-[var(--color-muted)]">{"  focus:     "}</span>
-                  <span className="text-[var(--color-accent)]">&quot;Frontend + Performance&quot;</span>
-                  <span className="text-[var(--color-muted)]">,</span>
-                </div>
-                <div>
-                  <span className="text-[var(--color-muted)]">{"  xp:        "}</span>
-                  <span className="text-[var(--color-accent)]">&quot;3+ years&quot;</span>
-                  <span className="text-[var(--color-muted)]">,</span>
-                </div>
-                <div>
-                  <span className="text-[var(--color-muted)]">{"  available: "}</span>
-                  <span className="text-green-400">true</span>
-                </div>
-                <div>
-                  <span className="text-[var(--color-muted)]">{"}"}</span>
-                </div>
-              </div>
-            </motion.div>
           </div>
 
           {/* RIGHT - trait cards */}
