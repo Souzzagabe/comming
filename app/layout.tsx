@@ -14,13 +14,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Portfólio | Desenvolvedor Fullstack",
+  title: "Souzzagabe | Desenvolvedor Fullstack",
   description:
-    "Desenvolvedor Fullstack com foco em Frontend. Especialista em Next.js, Angular, Node.js e PHP. Criação de interfaces modernas, responsivas e performáticas.",  icons: {
+    "Desenvolvedor Fullstack com foco em Frontend. Especialista em Next.js, Angular, Node.js e PHP. Criação de interfaces modernas, responsivas e performáticas.",
+  icons: {
     icon: "/favicon.png",
     shortcut: "/favicon.png",
     apple: "/favicon.png",
-  },  keywords: [
+  },
+  keywords: [
     "desenvolvedor fullstack",
     "frontend",
     "next.js",
@@ -31,9 +33,9 @@ export const metadata: Metadata = {
     "criação de sites",
     "landing page",
   ],
-  authors: [{ name: "Dev Fullstack" }],
+  authors: [{ name: "Gabriel Souza" }],
   openGraph: {
-    title: "Portfólio | Desenvolvedor Fullstack",
+    title: "Souzzagabe | Desenvolvedor Fullstack",
     description:
       "Desenvolvedor Fullstack com foco em Frontend. Interfaces modernas e performáticas.",
     type: "website",
