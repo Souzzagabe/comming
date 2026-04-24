@@ -9,9 +9,9 @@
   },
   "hero": {
     "available": "Available for projects",
-    "role": "Fullstack Developer focused on Frontend",
-    "title1": "Interfaces that",
-    "title2": "impress",
+    "role": "Landing Page · Institutional Sites · E-commerce · Systems & APPs",
+    "title1": "Custom WEB",
+    "title2": "Projects",
     "title3": "& Designer",
     "description": "I build high-performance interfaces with Next.js, Angular and Node.js. From design to deploy, I turn ideas into digital products that deliver results.",
     "cta_projects": "View projects",
@@ -87,7 +87,8 @@
     "sending": "Sending...",
     "success": "Message sent! I'll get back to you soon.",
     "response_time_label": "Response time",
-    "location": "Brazil — Porto Alegre, RS",
+    "location_label": "Location",
+    "location": "Porto Alegre, RS",
     "response_time": "Response within 24h"
   },
   "footer": {

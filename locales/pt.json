@@ -9,9 +9,9 @@
   },
   "hero": {
     "available": "Disponível para projetos",
-    "role": "Fullstack com foco em Frontend",
-    "title1": "Interfaces que",
-    "title2": "impressionam",
+    "role": "Landing Page · Sites Institucionais · E-commerce · Sistemas e APPS",
+    "title1": "Projetos WEB",
+    "title2": "personalizados",
     "title3": "& Designer",
     "description": "Crio interfaces de alta performance com Next.js, Angular e Node.js. Do design ao deploy, transformo ideias em produtos digitais que geram resultados.",
     "cta_projects": "Saiba mais",
@@ -87,7 +87,8 @@
     "sending": "Enviando...",
     "success": "Mensagem enviada! Retorno em breve.",
     "response_time_label": "Tempo de resposta",
-    "location": "Brasil — Porto Alegre, RS",
+    "location_label": "Localização",
+    "location": "Porto Alegre, RS",
     "response_time": "Resposta em até 24h"
   },
   "footer": {

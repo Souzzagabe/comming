@@ -159,20 +159,20 @@ export default function Hero() {
             transition={{ delay: 0.9, duration: 0.7 }}
             className="mt-8 flex flex-wrap items-center gap-4"
           >
-            <a
-              href="#servicos"
+            <button
+              onClick={() => document.getElementById("servicos")?.scrollIntoView({ behavior: "smooth" })}
               className="group relative inline-flex items-center gap-2 overflow-hidden bg-[var(--color-primary)] text-[var(--color-background)] px-7 py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all duration-300 hover:shadow-[0_0_30px_#00C8FF66]"
             >
               <span className="absolute inset-0 bg-white/20 translate-x-[-105%] group-hover:translate-x-[105%] transition-transform duration-500 skew-x-12 pointer-events-none" />
               {t.hero.cta_projects}
               <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
-            </a>
-            <a
-              href="#contato"
+            </button>
+            <button
+              onClick={() => document.getElementById("contato")?.scrollIntoView({ behavior: "smooth" })}
               className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-border)] px-7 py-3.5 text-sm font-medium text-[var(--color-foreground)] hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-card)] transition-all duration-300"
             >
               {t.hero.cta_contact}
-            </a>
+            </button>
           </motion.div>
         </div>
 

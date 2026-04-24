@@ -159,7 +159,7 @@ export default function Contact() {
                   <MapPin size={20} />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-sm">{t.contact.location.split("\u2014")[0].trim()}</h4>
+                  <h4 className="font-semibold text-sm">{t.contact.location_label}</h4>
                   <p className="text-sm text-[var(--color-muted)]">{t.contact.location}</p>
                 </div>
               </div>

@@ -6,6 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useI18n } from "@/app/contexts/i18n-context";
 
+function scrollTo(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+}
+
 export default function Header() {
   const { t, locale, setLocale } = useI18n();
   const [scrolled, setScrolled] = useState(false);
@@ -53,7 +57,7 @@ export default function Header() {
       }`}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <a href="#home" className="flex items-center">
+        <button onClick={() => scrollTo("home")} className="flex items-center">
           <Image
             src="/logo.png"
             alt="Logo"
@@ -62,13 +66,13 @@ export default function Header() {
             className="h-9 sm:h-11 md:h-14 w-auto object-contain"
             priority
           />
-        </a>
+        </button>
 
         <ul className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => (
             <li key={link.href}>
-              <a
-                href={link.href}
+              <button
+                onClick={() => scrollTo(link.href.slice(1))}
                 className={`relative px-3.5 py-2 text-sm rounded-lg transition-colors duration-200 ${
                   active === link.href
                     ? "text-[var(--color-foreground)]"
@@ -83,7 +87,7 @@ export default function Header() {
                   />
                 )}
                 <span className="relative">{link.label}</span>
-              </a>
+              </button>
             </li>
           ))}
         </ul>
@@ -99,12 +103,12 @@ export default function Header() {
             <span className={locale === "en" ? "text-[var(--color-primary)]" : ""}>EN</span>
           </button>
 
-          <a
-            href="#contato"
+          <button
+            onClick={() => scrollTo("contato")}
             className="hidden md:flex items-center gap-1.5 rounded-full border border-[var(--color-primary)]/40 bg-[var(--color-primary)]/8 px-5 py-2 text-xs font-semibold text-[var(--color-primary)] transition-all hover:bg-[var(--color-primary)]/15 hover:border-[var(--color-primary)]/70"
           >
             {t.nav.hire}
-          </a>
+          </button>
 
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -127,9 +131,8 @@ export default function Header() {
             <ul className="flex flex-col items-center gap-1 py-6 px-4">
               {navLinks.map((link) => (
                 <li key={link.href} className="w-full max-w-xs">
-                  <a
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
+                  <button
+                    onClick={() => { scrollTo(link.href.slice(1)); setMobileOpen(false); }}
                     className={`flex items-center justify-center py-3 rounded-xl text-base transition-colors ${
                       active === link.href
                         ? "bg-[var(--color-card)] text-[var(--color-foreground)] border border-[var(--color-border)]"
@@ -137,7 +140,7 @@ export default function Header() {
                     }`}
                   >
                     {link.label}
-                  </a>
+                  </button>
                 </li>
               ))}
             </ul>
