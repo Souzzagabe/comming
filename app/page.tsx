@@ -5,10 +5,12 @@ import About from "./components/About";
 import Services from "./components/Services";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
+import PageLoader from "./components/PageLoader";
 
 export default function Home() {
   return (
     <>
+      <PageLoader />
       <a className="skip-link" href="#conteudo">
         Ir para o conteúdo
       </a>
