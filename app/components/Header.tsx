@@ -25,6 +25,7 @@ export default function Header() {
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
 
     const observers = ["home", "sobre", "servicos", "contato"].flatMap((id) => {
       const section = document.getElementById(id);
@@ -62,12 +63,13 @@ export default function Header() {
       >
         <button
           onClick={() => scrollTo("home")}
-          className={`rounded-lg text-2xl font-bold tracking-[-0.09em] ${
+          className={`rounded-lg text-2xl font-bold tracking-[-0.09em] transition-colors ${
             scrolled ? "text-[var(--color-foreground)]" : "text-black"
           }`}
           aria-label="GS. — Home"
         >
-          GS<span className="text-[var(--color-primary)]">.</span>
+          GS
+          <span className={scrolled ? "text-[var(--color-primary)]" : "text-black"}>.</span>
         </button>
 
         <ul className="hidden items-center gap-1 md:flex">
@@ -104,14 +106,26 @@ export default function Header() {
               locale === "pt" ? "Change language to English" : "Mudar idioma para português"
             }
           >
-            <span className={locale === "pt" ? "text-[var(--color-primary)]" : ""}>PT</span>
+            <span
+              className={locale === "pt" && scrolled ? "text-[var(--color-primary)]" : "text-black"}
+            >
+              PT
+            </span>
             <span aria-hidden="true">/</span>
-            <span className={locale === "en" ? "text-[var(--color-primary)]" : ""}>EN</span>
+            <span
+              className={locale === "en" && scrolled ? "text-[var(--color-primary)]" : "text-black"}
+            >
+              EN
+            </span>
           </button>
 
           <button
             onClick={() => scrollTo("contato")}
-            className="hidden min-h-11 items-center gap-2 rounded-full bg-[var(--color-primary)] px-5 text-sm font-bold text-black transition-transform hover:-translate-y-0.5 md:flex"
+            className={`hidden min-h-11 items-center gap-2 rounded-full px-5 text-sm font-bold transition-all hover:-translate-y-0.5 md:flex ${
+              scrolled
+                ? "bg-[var(--color-primary)] text-black"
+                : "bg-black text-[var(--color-primary)]"
+            }`}
           >
             {t.nav.hire}
           </button>

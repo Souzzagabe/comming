@@ -1,8 +1,7 @@
 "use client";
 
-import { useRef, type MouseEvent } from "react";
+import { useEffect, useRef, type MouseEvent } from "react";
 import Image from "next/image";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { ArrowDown, ArrowRight } from "lucide-react";
 import { useI18n } from "@/app/contexts/i18n-context";
 
@@ -15,30 +14,79 @@ function scrollTo(id: string) {
 export default function Hero() {
   const { t } = useI18n();
   const sectionRef = useRef<HTMLElement>(null);
-  const pointerX = useMotionValue(0);
-  const pointerY = useMotionValue(0);
-  const smoothX = useSpring(pointerX, { stiffness: 45, damping: 22, mass: 0.6 });
-  const smoothY = useSpring(pointerY, { stiffness: 45, damping: 22, mass: 0.6 });
-  const imageX = useTransform(smoothX, [-1, 1], [10, -10]);
-  const imageY = useTransform(smoothY, [-1, 1], [-7, 7]);
+  const artRef = useRef<HTMLDivElement>(null);
+  const scrollLayerRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    const scrollLayer = scrollLayerRef.current;
+    if (!section || !scrollLayer) return;
+
+    const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const updateScrollParallax = () => {
+      const progress = motionPreference.matches
+        ? 0
+        : Math.min(1, Math.max(0, -section.getBoundingClientRect().top / section.offsetHeight));
+      scrollLayer.style.setProperty("--hero-scroll-offset", `${-36 * progress}px`);
+      scrollLayer.style.setProperty("--hero-scroll-scale", `${1 - 0.04 * progress}`);
+    };
+
+    window.addEventListener("scroll", updateScrollParallax, { passive: true });
+    window.addEventListener("resize", updateScrollParallax, { passive: true });
+    motionPreference.addEventListener("change", updateScrollParallax);
+    updateScrollParallax();
+
+    return () => {
+      window.removeEventListener("scroll", updateScrollParallax);
+      window.removeEventListener("resize", updateScrollParallax);
+      motionPreference.removeEventListener("change", updateScrollParallax);
+    };
+  }, []);
+
+  function resetImageTilt() {
+    const image = imageRef.current;
+    if (!image) return;
+
+    image.style.setProperty("--hero-image-x", "0px");
+    image.style.setProperty("--hero-image-y", "0px");
+    image.style.setProperty("--hero-image-rotate-x", "0deg");
+    image.style.setProperty("--hero-image-rotate-y", "0deg");
+  }
 
   function handleMouseMove(event: MouseEvent<HTMLElement>) {
-    if (
-      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      resetImageTilt();
       return;
     }
 
-    const bounds = sectionRef.current?.getBoundingClientRect();
-    if (!bounds) return;
-    pointerX.set(((event.clientX - bounds.left) / bounds.width) * 2 - 1);
-    pointerY.set(((event.clientY - bounds.top) / bounds.height) * 2 - 1);
-  }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      resetImageTilt();
+      return;
+    }
 
-  function handleMouseLeave() {
-    pointerX.set(0);
-    pointerY.set(0);
+    const bounds = artRef.current?.getBoundingClientRect();
+    if (!bounds) return;
+    if (
+      event.clientX < bounds.left ||
+      event.clientX > bounds.right ||
+      event.clientY < bounds.top ||
+      event.clientY > bounds.bottom
+    ) {
+      resetImageTilt();
+      return;
+    }
+
+    const image = imageRef.current;
+    if (!image) return;
+
+    const pointerX = (event.clientX - bounds.left) / bounds.width;
+    const pointerY = (event.clientY - bounds.top) / bounds.height;
+    image.style.setProperty("--hero-image-x", `${(0.5 - pointerX) * 22}px`);
+    image.style.setProperty("--hero-image-y", `${(pointerY - 0.5) * 18}px`);
+    image.style.setProperty("--hero-image-rotate-x", `${(0.5 - pointerY) * 22}deg`);
+    image.style.setProperty("--hero-image-rotate-y", `${(pointerX - 0.5) * 28}deg`);
   }
 
   return (
@@ -46,31 +94,28 @@ export default function Hero() {
       id="home"
       ref={sectionRef}
       onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+      onMouseLeave={resetImageTilt}
       className="hero-section relative isolate overflow-hidden"
     >
       <div className="hero-grid pointer-events-none absolute inset-0" />
       <div className="hero-ambient-glow pointer-events-none absolute" />
 
       <div className="hero-layout relative z-10 mx-auto">
-        <div className="hero-art-frame relative">
+        <div ref={artRef} className="hero-art-frame relative">
           <div className="hero-art-orbit pointer-events-none absolute inset-0" />
-          <motion.div
-            initial={false}
-            style={{ x: imageX, y: imageY }}
-            className="hero-image-reveal absolute inset-0"
-            aria-hidden="true"
-          >
-            <Image
-              src="/Gemini_Generated_Image_.png"
-              alt=""
-              fill
-              priority
-              sizes="(max-width: 767px) 100vw, (max-width: 1023px) 75vw, 48vw"
-              style={{ objectFit: "contain", objectPosition: "center" }}
-              className="hero-art-image object-contain"
-            />
-          </motion.div>
+          <div ref={scrollLayerRef} className="hero-scroll-parallax absolute inset-0">
+            <div ref={imageRef} className="hero-image-reveal absolute inset-0" aria-hidden="true">
+              <Image
+                src="/Gemini_Generated_Image_.png"
+                alt=""
+                fill
+                priority
+                sizes="(max-width: 767px) 100vw, (max-width: 1023px) 75vw, 48vw"
+                style={{ objectFit: "contain", objectPosition: "center" }}
+                className="hero-art-image object-contain"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="hero-copy">
