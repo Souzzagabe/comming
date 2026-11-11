@@ -425,6 +425,63 @@ button:not(:disabled),
   left: 43%;
 }
 
+.services-pebble {
+  z-index: 1;
+  width: var(--pebble-width);
+  height: var(--pebble-height);
+  animation: hero-pebble-drift var(--pebble-speed, 6s) ease-in-out infinite alternate;
+}
+
+.services-pebble span {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: var(--pebble-shape);
+  background:
+    radial-gradient(ellipse at 28% 22%, rgb(255 255 255 / 22%), transparent 34%),
+    linear-gradient(145deg, #303033 0%, #111113 48%, #050506 100%);
+  box-shadow:
+    inset -4px -5px 8px rgb(0 0 0 / 48%),
+    inset 2px 2px 3px rgb(255 255 255 / 12%),
+    0 10px 24px rgb(0 0 0 / 20%);
+}
+
+.services-pebble-one {
+  --pebble-width: 3.2rem;
+  --pebble-height: 2rem;
+  --pebble-shape: 39% 61% 55% 45% / 54% 37% 63% 46%;
+  --pebble-speed: 5.8s;
+  top: 14%;
+  right: 9%;
+}
+
+.services-pebble-two {
+  --pebble-width: 2.1rem;
+  --pebble-height: 1.5rem;
+  --pebble-shape: 58% 42% 34% 66% / 50% 62% 38% 50%;
+  --pebble-speed: 7s;
+  top: 40%;
+  left: 2.5%;
+}
+
+.services-pebble-three {
+  --pebble-width: 2.7rem;
+  --pebble-height: 1.8rem;
+  --pebble-shape: 43% 57% 65% 35% / 43% 52% 48% 57%;
+  --pebble-speed: 6.5s;
+  right: 3%;
+  bottom: 23%;
+}
+
+.services-pebble-four {
+  --pebble-width: 1.8rem;
+  --pebble-height: 1.3rem;
+  --pebble-shape: 62% 38% 49% 51% / 38% 60% 40% 62%;
+  --pebble-speed: 5.2s;
+  bottom: 8%;
+  left: 18%;
+}
+
 .hero-pebble-copy {
   --pebble-width: 2.7rem;
   --pebble-height: 1.8rem;

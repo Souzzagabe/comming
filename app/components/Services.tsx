@@ -32,8 +32,32 @@ export default function Services() {
   return (
     <section
       id="servicos"
-      className="relative scroll-reveal bg-[var(--color-primary)] py-24 text-black md:py-32"
+      className="services-section relative isolate scroll-reveal overflow-hidden bg-[var(--color-primary)] py-24 text-black md:py-32"
     >
+      <div
+        className="services-pebble services-pebble-one pointer-events-none absolute"
+        aria-hidden="true"
+      >
+        <span />
+      </div>
+      <div
+        className="services-pebble services-pebble-two pointer-events-none absolute"
+        aria-hidden="true"
+      >
+        <span />
+      </div>
+      <div
+        className="services-pebble services-pebble-three pointer-events-none absolute"
+        aria-hidden="true"
+      >
+        <span />
+      </div>
+      <div
+        className="services-pebble services-pebble-four pointer-events-none absolute"
+        aria-hidden="true"
+      >
+        <span />
+      </div>
       <div
         className="absolute top-0 inset-x-0 h-px"
         style={{
@@ -42,7 +66,7 @@ export default function Services() {
         }}
       />
 
-      <div ref={ref} className="mx-auto max-w-7xl px-4 sm:px-8 md:px-14">
+      <div ref={ref} className="relative z-10 mx-auto max-w-7xl px-4 sm:px-8 md:px-14">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
