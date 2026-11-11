@@ -17,6 +17,19 @@ export default function Hero() {
   const artRef = useRef<HTMLDivElement>(null);
   const scrollLayerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
+  const floatingRefs = useRef<Array<HTMLDivElement | null>>([]);
+
+  function resetPointerMotion() {
+    const image = imageRef.current;
+    image?.style.setProperty("--hero-image-x", "0px");
+    image?.style.setProperty("--hero-image-y", "0px");
+    image?.style.setProperty("--hero-image-rotate-x", "0deg");
+    image?.style.setProperty("--hero-image-rotate-y", "0deg");
+    floatingRefs.current.forEach((item) => {
+      item?.style.setProperty("--hero-float-x", "0px");
+      item?.style.setProperty("--hero-float-y", "0px");
+    });
+  }
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -45,48 +58,51 @@ export default function Hero() {
     };
   }, []);
 
-  function resetImageTilt() {
-    const image = imageRef.current;
-    if (!image) return;
-
-    image.style.setProperty("--hero-image-x", "0px");
-    image.style.setProperty("--hero-image-y", "0px");
-    image.style.setProperty("--hero-image-rotate-x", "0deg");
-    image.style.setProperty("--hero-image-rotate-y", "0deg");
-  }
-
   function handleMouseMove(event: MouseEvent<HTMLElement>) {
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-      resetImageTilt();
+      resetPointerMotion();
       return;
     }
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      resetImageTilt();
+      resetPointerMotion();
       return;
     }
 
-    const bounds = artRef.current?.getBoundingClientRect();
-    if (!bounds) return;
-    if (
-      event.clientX < bounds.left ||
-      event.clientX > bounds.right ||
-      event.clientY < bounds.top ||
-      event.clientY > bounds.bottom
-    ) {
-      resetImageTilt();
-      return;
-    }
+    const sectionBounds = sectionRef.current?.getBoundingClientRect();
+    if (!sectionBounds) return;
 
+    const pointerX = (event.clientX - sectionBounds.left) / sectionBounds.width;
+    const pointerY = (event.clientY - sectionBounds.top) / sectionBounds.height;
+    floatingRefs.current.forEach((item) => {
+      if (!item) return;
+      const depth = Number(item.dataset.depth ?? 24);
+      item.style.setProperty("--hero-float-x", `${(0.5 - pointerX) * depth}px`);
+      item.style.setProperty("--hero-float-y", `${(0.5 - pointerY) * depth}px`);
+    });
+
+    const artBounds = artRef.current?.getBoundingClientRect();
     const image = imageRef.current;
-    if (!image) return;
+    const pointerOverImage =
+      artBounds &&
+      event.clientX >= artBounds.left &&
+      event.clientX <= artBounds.right &&
+      event.clientY >= artBounds.top &&
+      event.clientY <= artBounds.bottom;
+    if (!artBounds || !pointerOverImage || !image) {
+      image?.style.setProperty("--hero-image-x", "0px");
+      image?.style.setProperty("--hero-image-y", "0px");
+      image?.style.setProperty("--hero-image-rotate-x", "0deg");
+      image?.style.setProperty("--hero-image-rotate-y", "0deg");
+      return;
+    }
 
-    const pointerX = (event.clientX - bounds.left) / bounds.width;
-    const pointerY = (event.clientY - bounds.top) / bounds.height;
-    image.style.setProperty("--hero-image-x", `${(0.5 - pointerX) * 22}px`);
-    image.style.setProperty("--hero-image-y", `${(pointerY - 0.5) * 18}px`);
-    image.style.setProperty("--hero-image-rotate-x", `${(0.5 - pointerY) * 22}deg`);
-    image.style.setProperty("--hero-image-rotate-y", `${(pointerX - 0.5) * 28}deg`);
+    const artX = (event.clientX - artBounds.left) / artBounds.width;
+    const artY = (event.clientY - artBounds.top) / artBounds.height;
+    image.style.setProperty("--hero-image-x", `${(0.5 - artX) * 22}px`);
+    image.style.setProperty("--hero-image-y", `${(artY - 0.5) * 18}px`);
+    image.style.setProperty("--hero-image-rotate-x", `${(0.5 - artY) * 22}deg`);
+    image.style.setProperty("--hero-image-rotate-y", `${(artX - 0.5) * 28}deg`);
   }
 
   return (
@@ -94,11 +110,32 @@ export default function Hero() {
       id="home"
       ref={sectionRef}
       onMouseMove={handleMouseMove}
-      onMouseLeave={resetImageTilt}
+      onMouseLeave={resetPointerMotion}
       className="hero-section relative isolate overflow-hidden"
     >
       <div className="hero-grid pointer-events-none absolute inset-0" />
       <div className="hero-ambient-glow pointer-events-none absolute" />
+      {[
+        "hero-pebble-one",
+        "hero-pebble-two",
+        "hero-pebble-three",
+        "hero-pebble-four",
+        "hero-pebble-five",
+        "hero-pebble-six",
+        "hero-pebble-seven",
+      ].map((className, index) => (
+        <div
+          key={className}
+          ref={(element) => {
+            floatingRefs.current[index] = element;
+          }}
+          data-depth={22 + index * 6}
+          className={`hero-pebble ${className} pointer-events-none absolute`}
+          aria-hidden="true"
+        >
+          <span />
+        </div>
+      ))}
 
       <div className="hero-layout relative z-10 mx-auto">
         <div ref={artRef} className="hero-art-frame relative">
@@ -119,6 +156,16 @@ export default function Hero() {
         </div>
 
         <div className="hero-copy">
+          <div
+            ref={(element) => {
+              floatingRefs.current[7] = element;
+            }}
+            data-depth="36"
+            className="hero-pebble hero-pebble-copy pointer-events-none absolute"
+            aria-hidden="true"
+          >
+            <span />
+          </div>
           <div className="hero-availability hero-enter hero-enter-1 mb-6 inline-flex items-center gap-2.5 rounded-full px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] sm:text-xs">
             <span className="hero-status-dot relative flex size-2">
               <span className="absolute inline-flex size-full animate-ping rounded-full opacity-50" />
@@ -165,14 +212,6 @@ export default function Hero() {
               {t.hero.cta_contact}
             </button>
           </div>
-        </div>
-
-        <div className="hero-location hero-enter hero-enter-6 absolute flex items-center gap-3 rounded-full px-5 py-3 font-mono text-[10px] uppercase tracking-[0.18em]">
-          <span className="text-sm font-bold tracking-[-0.08em]">
-            GS<span className="hero-location-accent">.</span>
-          </span>
-          <span className="hero-location-divider h-4 w-px" />
-          Porto Alegre, RS
         </div>
       </div>
 
