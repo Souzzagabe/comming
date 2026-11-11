@@ -440,6 +440,7 @@ button:not(:disabled),
   border: 1px solid rgb(0 0 0 / 28%);
   background: rgb(255 255 255 / 12%);
   color: var(--hero-ink);
+  text-shadow: 0 1px 2px rgb(255 255 255 / 22%);
 }
 
 .hero-status-dot span {
@@ -453,26 +454,35 @@ button:not(:disabled),
   line-height: 0.92;
   letter-spacing: -0.075em;
   overflow-wrap: anywhere;
+  text-shadow:
+    0 2px 1px rgb(255 255 255 / 18%),
+    0 10px 24px rgb(61 48 0 / 10%);
 }
 
 .hero-title-accent {
   color: #141414;
+  text-shadow:
+    0 2px 1px rgb(255 255 255 / 12%),
+    0 8px 20px rgb(61 48 0 / 9%);
 }
 
 .hero-role {
   max-width: 40rem;
   color: rgb(9 9 9 / 74%);
+  text-shadow: 0 1px 7px rgb(61 48 0 / 9%);
 }
 
 .hero-description {
   max-width: 34rem;
   color: rgb(9 9 9 / 78%);
+  text-shadow: 0 1px 8px rgb(61 48 0 / 8%);
 }
 
 .hero-tech {
   border: 1px solid rgb(0 0 0 / 25%);
   background: rgb(255 255 255 / 12%);
   color: var(--hero-ink);
+  text-shadow: 0 1px 5px rgb(255 255 255 / 24%);
   transition:
     color 180ms ease,
     background-color 180ms ease,
@@ -488,15 +498,42 @@ button:not(:disabled),
 .hero-primary-button {
   background: var(--hero-ink);
   color: var(--hero-yellow);
+  box-shadow:
+    0 8px 18px rgb(46 36 0 / 20%),
+    0 2px 4px rgb(0 0 0 / 12%),
+    inset 0 1px 0 rgb(255 255 255 / 10%);
+  text-shadow: 0 1px 5px rgb(255 255 255 / 12%);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+
+.hero-primary-button:hover {
+  box-shadow:
+    0 12px 24px rgb(46 36 0 / 24%),
+    0 3px 6px rgb(0 0 0 / 14%),
+    inset 0 1px 0 rgb(255 255 255 / 12%);
 }
 
 .hero-secondary-button {
   border: 1px solid rgb(0 0 0 / 42%);
   color: var(--hero-ink);
+  box-shadow:
+    0 5px 14px rgb(46 36 0 / 9%),
+    inset 0 1px 0 rgb(255 255 255 / 16%);
+  text-shadow: 0 1px 5px rgb(255 255 255 / 18%);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
 }
 
 .hero-secondary-button:hover {
   background: rgb(0 0 0 / 7%);
+  box-shadow:
+    0 8px 18px rgb(46 36 0 / 13%),
+    inset 0 1px 0 rgb(255 255 255 / 18%);
 }
 
 .hero-location {
