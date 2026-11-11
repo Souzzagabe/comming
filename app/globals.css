@@ -447,11 +447,27 @@ button:not(:disabled),
   border: 1px solid rgb(0 0 0 / 28%);
   background: rgb(255 255 255 / 12%);
   color: var(--hero-ink);
-  text-shadow: 0 1px 2px rgb(255 255 255 / 22%);
+  box-shadow:
+    0 2px 0 rgb(0 0 0 / 14%),
+    0 7px 16px rgb(61 48 0 / 12%),
+    inset 0 1px 0 rgb(255 255 255 / 28%);
+  text-shadow:
+    0 1px 0 rgb(255 255 255 / 28%),
+    0 2px 4px rgb(61 48 0 / 12%);
 }
 
 .hero-status-dot span {
-  background: var(--hero-ink);
+  background: #25d366;
+}
+
+.hero-status-dot span:first-child {
+  box-shadow: 0 0 8px rgb(37 211 102 / 58%);
+}
+
+.hero-status-dot span:last-child {
+  box-shadow:
+    0 0 0 2px rgb(37 211 102 / 20%),
+    0 0 8px rgb(37 211 102 / 48%);
 }
 
 .hero-title {
