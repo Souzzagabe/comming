@@ -5,19 +5,17 @@ import About from "./components/About";
 import Services from "./components/Services";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
-import CustomCursor from "./components/CustomCursor";
-import PageLoader from "./components/PageLoader";
-import StarField from "./components/StarField";
 
 export default function Home() {
   return (
     <>
-      <PageLoader />
-      <CustomCursor />
-      <StarField />
+      <a className="skip-link" href="#conteudo">
+        Ir para o conteúdo
+      </a>
+      <div className="scroll-progress" aria-hidden="true" />
       <Header />
 
-      <main className="relative z-10">
+      <main id="conteudo" className="relative z-10">
         <Hero />
         <Marquee />
         <About />
@@ -29,5 +27,3 @@ export default function Home() {
     </>
   );
 }
-
-

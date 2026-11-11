@@ -1,152 +1,134 @@
-﻿"use client";
+"use client";
 
-import { useRef } from "react";
+import { useRef, type MouseEvent } from "react";
 import Image from "next/image";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { ArrowRight, ArrowDown } from "lucide-react";
+import { ArrowDown, ArrowRight } from "lucide-react";
 import { useI18n } from "@/app/contexts/i18n-context";
 
 const TECHS = ["Next.js", "React", "TypeScript", "Node.js", "Angular", "PHP"];
 
+function scrollTo(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+}
+
 export default function Hero() {
   const { t } = useI18n();
+  const sectionRef = useRef<HTMLElement>(null);
+  const pointerX = useMotionValue(0);
+  const pointerY = useMotionValue(0);
+  const smoothX = useSpring(pointerX, { stiffness: 45, damping: 22, mass: 0.6 });
+  const smoothY = useSpring(pointerY, { stiffness: 45, damping: 22, mass: 0.6 });
+  const imageX = useTransform(smoothX, [-1, 1], [12, -12]);
+  const imageY = useTransform(smoothY, [-1, 1], [-8, 8]);
 
-  const containerRef = useRef<HTMLElement>(null);
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const springX = useSpring(mouseX, { stiffness: 30, damping: 20 });
-  const springY = useSpring(mouseY, { stiffness: 30, damping: 20 });
-  const imgX = useTransform(springX, [-1, 1], [-10, 10]);
-  const imgY = useTransform(springY, [-1, 1], [-6, 6]);
-
-  function onMouseMove(e: React.MouseEvent<HTMLElement>) {
-    const r = containerRef.current?.getBoundingClientRect();
-    if (!r) return;
-    mouseX.set(((e.clientX - r.left) / r.width) * 2 - 1);
-    mouseY.set(((e.clientY - r.top) / r.height) * 2 - 1);
+  function handleMouseMove(event: MouseEvent<HTMLElement>) {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    const bounds = sectionRef.current?.getBoundingClientRect();
+    if (!bounds) return;
+    pointerX.set(((event.clientX - bounds.left) / bounds.width) * 2 - 1);
+    pointerY.set(((event.clientY - bounds.top) / bounds.height) * 2 - 1);
   }
-  function onMouseLeave() {
-    mouseX.set(0);
-    mouseY.set(0);
+
+  function handleMouseLeave() {
+    pointerX.set(0);
+    pointerY.set(0);
   }
 
   return (
     <section
       id="home"
-      ref={containerRef}
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
-      className="relative overflow-hidden bg-[var(--color-background)]"
+      ref={sectionRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="relative isolate flex min-h-[min(900px,100svh)] items-center overflow-hidden bg-[var(--color-background)]"
     >
-      {/* Max-width inner wrapper — fixes ultra-wide layouts */}
-      <div className="relative max-w-[1800px] mx-auto min-h-screen">
+      <div className="pointer-events-none absolute inset-0 grid-overlay opacity-60" />
 
-        <div className="absolute inset-0 pointer-events-none">
-          <div
-            className="absolute top-0 right-0 w-[55%] h-full"
-            style={{ background: "radial-gradient(ellipse at 80% 40%, #00C8FF08 0%, transparent 60%)" }}
-          />
-        </div>
+      <div className="hero-ambient-glow pointer-events-none absolute -right-36 top-1/4 size-[34rem] rounded-full bg-[var(--color-primary)] opacity-[0.07] blur-[120px]" />
 
-        {/* RIGHT — full-height photo */}
-        <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-[52%] overflow-hidden">
-          <div
-            className="absolute left-0 top-0 bottom-0 w-64 z-10 pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(to right, var(--color-background) 0%, var(--color-background) 15%, transparent 100%)",
-            }}
-          />
-          <div className="absolute top-0 inset-x-0 h-28 z-10 pointer-events-none"
-            style={{ background: "linear-gradient(to bottom, var(--color-background), transparent)" }} />
-          <div className="absolute bottom-0 inset-x-0 h-40 z-10 pointer-events-none"
-            style={{ background: "linear-gradient(to top, var(--color-background), transparent)" }} />
-          <motion.div style={{ x: imgX, y: imgY }} className="relative w-full h-full">
-            <Image
-              src="/fotosite.png"
-              alt="Developer portrait"
-              fill
-              priority
-              sizes="52vw"
-              className="object-cover object-top"
-            />
-          </motion.div>
-          <div
-            className="absolute left-0 top-1/4 bottom-1/4 w-px z-20 pointer-events-none"
-            style={{ background: "linear-gradient(to bottom, transparent, var(--color-primary) 50%, transparent)" }}
-          />
-        </div>
+      <motion.div
+        initial={false}
+        animate={{ opacity: 1, scale: 1, x: 0 }}
+        transition={{ duration: 1.1, ease: [0.2, 0.7, 0.2, 1] }}
+        style={{ x: imageX, y: imageY }}
+        className="hero-portrait hero-image-enter pointer-events-none absolute inset-0 z-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[60%]"
+        aria-hidden="true"
+      >
+        <Image
+          src="/Gemini_Generated_Image_.png"
+          alt=""
+          fill
+          priority
+          sizes="(max-width: 1023px) 100vw, 60vw"
+          className="object-cover object-[72%_top] lg:object-contain lg:object-right-top"
+        />
+      </motion.div>
 
-        {/* Mobile */}
-        <div className="lg:hidden absolute inset-0 z-0">
-          <Image src="/fotosite.png" alt="Developer portrait" fill priority sizes="100vw" className="object-cover object-top" />
-          <div className="absolute inset-0"
-            style={{ background: "linear-gradient(160deg, rgba(6,13,18,0.55) 0%, rgba(6,13,18,0.88) 55%, rgba(6,13,18,0.98) 85%)" }} />
-        </div>
+      <div className="hero-portrait-blend pointer-events-none absolute inset-0 z-[1]" />
 
-        {/* LEFT — text content */}
-        <div className="relative z-10 flex flex-col justify-center min-h-screen px-6 sm:px-10 md:px-14 lg:px-20 xl:px-28 pt-24 pb-16 md:py-28 lg:w-[54%]">
+      <div className="relative z-10 mx-auto grid min-h-[min(900px,100svh)] w-full max-w-7xl items-center px-5 pb-24 pt-32 sm:px-8 md:px-12 lg:grid-cols-[1.08fr_0.92fr] lg:gap-8 lg:px-16 lg:py-28">
+        <div className="max-w-2xl">
           <motion.div
-            initial={{ opacity: 0, y: -12 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="flex items-center gap-2.5 mb-8"
+            transition={{ duration: 0.55, delay: 0.1 }}
+            className="hero-enter hero-enter-1 mb-7 inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-black/45 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-primary)] backdrop-blur-md sm:text-xs"
           >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-primary)] opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--color-primary)]" />
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-[var(--color-primary)] opacity-50" />
+              <span className="relative inline-flex size-2 rounded-full bg-[var(--color-primary)]" />
             </span>
-            <span className="text-[11px] font-mono tracking-[0.3em] uppercase text-[var(--color-primary)]">
-              {t.hero.available}
-            </span>
+            {t.hero.available}
           </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="font-black leading-[1.05] tracking-tight"
-          >
-            <span className="block text-[var(--color-foreground)]" style={{ fontSize: "clamp(2rem, 4vw, 4rem)" }}>
+          <h1 className="max-w-[12ch] text-[clamp(3rem,6.4vw,6.5rem)] font-bold leading-[0.92] tracking-[-0.075em]">
+            <motion.span
+              initial={false}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.16, ease: [0.2, 0.7, 0.2, 1] }}
+              className="hero-line block"
+            >
               {t.hero.title1}
-            </span>
-            <span
-              className="block bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] bg-clip-text text-transparent"
-              style={{ fontSize: "clamp(2rem, 4vw, 4rem)" }}
+            </motion.span>
+            <motion.span
+              initial={false}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.28, ease: [0.2, 0.7, 0.2, 1] }}
+              className="hero-line block text-[var(--color-primary)]"
             >
               {t.hero.title2}
-            </span>
-          </motion.h1>
+            </motion.span>
+          </h1>
 
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.35, duration: 0.7 }}
-            className="mt-5 text-sm md:text-base font-medium text-[var(--color-muted)] tracking-wide"
+            initial={false}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.38 }}
+            className="hero-enter hero-enter-2 mt-6 max-w-xl text-xs font-medium uppercase leading-relaxed tracking-[0.12em] text-[var(--color-muted)] sm:text-sm"
           >
             {t.hero.role}
           </motion.p>
-
           <motion.p
-            initial={{ opacity: 0, y: 16 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.7 }}
-            className="mt-5 text-[var(--color-muted)] leading-relaxed max-w-md text-sm md:text-base"
+            transition={{ duration: 0.55, delay: 0.46 }}
+            className="hero-enter hero-enter-3 mt-4 max-w-lg text-sm leading-relaxed text-[var(--color-muted)] sm:text-base"
           >
             {t.hero.description}
           </motion.p>
 
-          {/* Tech stack pills — replaces stats bar */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.7 }}
-            className="mt-10 flex flex-wrap gap-2"
+            transition={{ duration: 0.55, delay: 0.54 }}
+            className="hero-enter hero-enter-4 mt-7 flex flex-wrap gap-2"
+            aria-label="Tecnologias"
           >
             {TECHS.map((tech) => (
               <span
                 key={tech}
-                className="inline-flex items-center px-4 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-card)]/60 text-xs font-mono font-medium text-[var(--color-foreground)] tracking-wide hover:border-[var(--color-primary)]/60 hover:text-[var(--color-primary)] transition-colors duration-200"
+                className="rounded-full border border-white/15 bg-black/35 px-3 py-1.5 font-mono text-[10px] text-[var(--color-foreground)] backdrop-blur-md transition-colors hover:border-[var(--color-primary)]"
               >
                 {tech}
               </span>
@@ -154,40 +136,46 @@ export default function Hero() {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9, duration: 0.7 }}
-            className="mt-8 flex flex-wrap items-center gap-4"
+            transition={{ duration: 0.55, delay: 0.62 }}
+            className="hero-enter hero-enter-5 mt-8 flex flex-wrap items-center gap-3"
           >
             <button
-              onClick={() => document.getElementById("servicos")?.scrollIntoView({ behavior: "smooth" })}
-              className="group relative inline-flex items-center gap-2 overflow-hidden bg-[var(--color-primary)] text-[var(--color-background)] px-7 py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all duration-300 hover:shadow-[0_0_30px_#00C8FF66]"
+              onClick={() => scrollTo("servicos")}
+              className="magnetic-button inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--color-primary)] px-6 py-3 text-sm font-bold text-black transition-transform"
             >
-              <span className="absolute inset-0 bg-white/20 translate-x-[-105%] group-hover:translate-x-[105%] transition-transform duration-500 skew-x-12 pointer-events-none" />
               {t.hero.cta_projects}
-              <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+              <ArrowRight size={16} aria-hidden="true" />
             </button>
             <button
-              onClick={() => document.getElementById("contato")?.scrollIntoView({ behavior: "smooth" })}
-              className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-border)] px-7 py-3.5 text-sm font-medium text-[var(--color-foreground)] hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-card)] transition-all duration-300"
+              onClick={() => scrollTo("contato")}
+              className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/20 bg-black/20 px-6 py-3 text-sm font-semibold text-[var(--color-foreground)] backdrop-blur-md transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
             >
               {t.hero.cta_contact}
             </button>
           </motion.div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.4 }}
-          className="absolute bottom-8 left-8 md:left-14 lg:left-20 xl:left-28 z-20 flex items-center gap-2"
-        >
-          <motion.div animate={{ y: [0, 5, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}>
-            <ArrowDown size={13} className="text-[var(--color-primary)]" />
+        <div className="pointer-events-none relative hidden h-full min-h-[540px] lg:block">
+          <motion.div
+            initial={false}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, delay: 0.65 }}
+            className="hero-enter hero-enter-6 absolute bottom-8 right-1 flex items-center gap-3 rounded-full border border-white/15 bg-black/55 px-5 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-foreground)] backdrop-blur-md"
+          >
+            <span className="text-sm font-bold tracking-[-0.08em]">
+              GS<span className="text-[var(--color-primary)]">.</span>
+            </span>
+            <span className="h-4 w-px bg-white/25" />
+            Porto Alegre, RS
           </motion.div>
-          <span className="text-[10px] font-mono tracking-[0.25em] uppercase text-[var(--color-muted)]">{t.hero.scroll}</span>
-        </motion.div>
+        </div>
+      </div>
 
+      <div className="absolute bottom-5 left-5 z-10 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-muted)] sm:bottom-8 sm:left-8 lg:left-16">
+        <ArrowDown size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
+        {t.hero.scroll}
       </div>
     </section>
   );

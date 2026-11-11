@@ -1,8 +1,7 @@
-﻿"use client";
+"use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useI18n } from "@/app/contexts/i18n-context";
 
@@ -17,103 +16,102 @@ export default function Header() {
   const [active, setActive] = useState("#home");
 
   const navLinks = [
-    { href: "#home",     label: t.nav.home     },
-    { href: "#sobre",    label: t.nav.about    },
+    { href: "#home", label: t.nav.home },
+    { href: "#sobre", label: t.nav.about },
     { href: "#servicos", label: t.nav.services },
-    { href: "#contato",  label: t.nav.contact  },
+    { href: "#contato", label: t.nav.contact },
   ];
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50);
+    const onScroll = () => setScrolled(window.scrollY > 24);
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
-  useEffect(() => {
-    const ids = ["home", "sobre", "servicos", "contato"];
-    const observers: IntersectionObserver[] = [];
-    ids.forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const obs = new IntersectionObserver(
-        ([entry]) => { if (entry.isIntersecting) setActive(`#${id}`); },
-        { rootMargin: "-40% 0px -55% 0px" }
+    const observers = ["home", "sobre", "servicos", "contato"].flatMap((id) => {
+      const section = document.getElementById(id);
+      if (!section) return [];
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) setActive(`#${id}`);
+        },
+        { rootMargin: "-40% 0px -55% 0px" },
       );
-      obs.observe(el);
-      observers.push(obs);
+      observer.observe(section);
+      return [observer];
     });
-    return () => observers.forEach((o) => o.disconnect());
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      observers.forEach((observer) => observer.disconnect());
+    };
   }, []);
 
   return (
     <motion.header
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      initial={{ y: -24, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.45, ease: "easeOut" }}
+      className={`fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300 ${
         scrolled
-          ? "bg-[var(--color-background)]/90 backdrop-blur-xl border-b border-[var(--color-border)]"
-          : "bg-transparent"
+          ? "border-[var(--color-border)] bg-black/85 backdrop-blur-xl"
+          : "border-transparent bg-gradient-to-b from-black/50 to-transparent"
       }`}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <button onClick={() => scrollTo("home")} className="flex items-center">
-          <Image
-            src="/logo.png"
-            alt="Logo"
-            width={180}
-            height={54}
-            className="h-9 sm:h-11 md:h-14 w-auto object-contain"
-            priority
-          />
+      <nav
+        aria-label={locale === "pt" ? "Navegação principal" : "Main navigation"}
+        className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-12"
+      >
+        <button
+          onClick={() => scrollTo("home")}
+          className="rounded-lg text-2xl font-bold tracking-[-0.09em] text-[var(--color-foreground)]"
+          aria-label="GS. — Home"
+        >
+          GS<span className="text-[var(--color-primary)]">.</span>
         </button>
 
-        <ul className="hidden md:flex items-center gap-1">
+        <ul className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => (
             <li key={link.href}>
               <button
                 onClick={() => scrollTo(link.href.slice(1))}
-                className={`relative px-3.5 py-2 text-sm rounded-lg transition-colors duration-200 ${
+                aria-current={active === link.href ? "location" : undefined}
+                className={`rounded-full px-4 py-2 text-sm transition-colors ${
                   active === link.href
-                    ? "text-[var(--color-foreground)]"
+                    ? "bg-[var(--color-surface)] text-[var(--color-foreground)]"
                     : "text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
                 }`}
               >
-                {active === link.href && (
-                  <motion.span
-                    layoutId="nav-indicator"
-                    className="absolute inset-0 rounded-lg bg-[var(--color-card)] border border-[var(--color-border)]"
-                    transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                  />
-                )}
-                <span className="relative">{link.label}</span>
+                {link.label}
               </button>
             </li>
           ))}
         </ul>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => setLocale(locale === "pt" ? "en" : "pt")}
-            className="flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1.5 text-xs font-bold text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]/50 transition-all"
-            aria-label="Toggle language"
+            className="inline-flex min-h-11 items-center gap-1 rounded-full border border-[var(--color-border)] px-3 text-xs font-bold text-[var(--color-muted)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+            aria-label={
+              locale === "pt" ? "Change language to English" : "Mudar idioma para português"
+            }
           >
             <span className={locale === "pt" ? "text-[var(--color-primary)]" : ""}>PT</span>
-            <span className="text-[var(--color-border)]">/</span>
+            <span aria-hidden="true">/</span>
             <span className={locale === "en" ? "text-[var(--color-primary)]" : ""}>EN</span>
           </button>
 
           <button
             onClick={() => scrollTo("contato")}
-            className="hidden md:flex items-center gap-1.5 rounded-full border border-[var(--color-primary)]/40 bg-[var(--color-primary)]/8 px-5 py-2 text-xs font-semibold text-[var(--color-primary)] transition-all hover:bg-[var(--color-primary)]/15 hover:border-[var(--color-primary)]/70"
+            className="hidden min-h-11 items-center gap-2 rounded-full bg-[var(--color-primary)] px-5 text-sm font-bold text-black transition-transform hover:-translate-y-0.5 md:flex"
           >
             {t.nav.hire}
           </button>
 
           <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 rounded-lg border border-[var(--color-border)] text-[var(--color-foreground)] hover:bg-[var(--color-card)] transition-colors"
-            aria-label="Toggle menu"
+            onClick={() => setMobileOpen((open) => !open)}
+            className="inline-flex size-11 items-center justify-center rounded-full border border-[var(--color-border)] text-[var(--color-foreground)] md:hidden"
+            aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation"
           >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -123,21 +121,22 @@ export default function Header() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden overflow-hidden bg-[var(--color-background)]/96 backdrop-blur-xl border-b border-[var(--color-border)]"
+            id="mobile-navigation"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18 }}
+            className="border-t border-[var(--color-border)] bg-black/95 px-5 pb-5 pt-3 backdrop-blur-xl md:hidden"
           >
-            <ul className="flex flex-col items-center gap-1 py-6 px-4">
+            <ul className="mx-auto flex max-w-7xl flex-col gap-1">
               {navLinks.map((link) => (
-                <li key={link.href} className="w-full max-w-xs">
+                <li key={link.href}>
                   <button
-                    onClick={() => { scrollTo(link.href.slice(1)); setMobileOpen(false); }}
-                    className={`flex items-center justify-center py-3 rounded-xl text-base transition-colors ${
-                      active === link.href
-                        ? "bg-[var(--color-card)] text-[var(--color-foreground)] border border-[var(--color-border)]"
-                        : "text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
-                    }`}
+                    onClick={() => {
+                      scrollTo(link.href.slice(1));
+                      setMobileOpen(false);
+                    }}
+                    className="min-h-12 w-full rounded-xl px-4 text-left text-base text-[var(--color-foreground)] transition-colors hover:bg-[var(--color-surface)] hover:text-[var(--color-primary)]"
                   >
                     {link.label}
                   </button>
@@ -150,4 +149,3 @@ export default function Header() {
     </motion.header>
   );
 }
-

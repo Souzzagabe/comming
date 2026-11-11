@@ -45,7 +45,7 @@ export default function Contact() {
   }
 
   return (
-    <section id="contato" className="relative py-24 md:py-32 section-glow-top">
+    <section id="contato" className="relative scroll-reveal py-24 md:py-32 section-glow-top">
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--color-primary)]/30 to-transparent" />
       </div>
@@ -72,11 +72,14 @@ export default function Contact() {
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="lg:col-span-3 space-y-5"
+            className="lg:col-span-3 space-y-5 rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-8"
           >
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium mb-2 text-[var(--color-foreground)]/80">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium mb-2 text-[var(--color-foreground)]/80"
+                >
                   {t.contact.name}
                 </label>
                 <input
@@ -88,7 +91,10 @@ export default function Contact() {
                 />
               </div>
               <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-2 text-[var(--color-foreground)]/80">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium mb-2 text-[var(--color-foreground)]/80"
+                >
                   {t.contact.email}
                 </label>
                 <input
@@ -102,7 +108,10 @@ export default function Contact() {
             </div>
 
             <div>
-              <label htmlFor="subject" className="block text-sm font-medium mb-2 text-[var(--color-foreground)]/80">
+              <label
+                htmlFor="subject"
+                className="block text-sm font-medium mb-2 text-[var(--color-foreground)]/80"
+              >
                 {t.contact.subject}
               </label>
               <input
@@ -115,7 +124,10 @@ export default function Contact() {
             </div>
 
             <div>
-              <label htmlFor="message" className="block text-sm font-medium mb-2 text-[var(--color-foreground)]/80">
+              <label
+                htmlFor="message"
+                className="block text-sm font-medium mb-2 text-[var(--color-foreground)]/80"
+              >
                 {t.contact.message}
               </label>
               <textarea
@@ -130,7 +142,7 @@ export default function Contact() {
             <button
               type="submit"
               disabled={loading || submitted}
-              className="group relative flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] px-8 py-3.5 text-sm font-bold text-[var(--color-background)] transition-all hover:shadow-lg hover:shadow-[var(--color-primary)]/40 hover:scale-105 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="magnetic-button group relative flex min-h-12 items-center gap-2 overflow-hidden rounded-full bg-[var(--color-primary)] px-8 py-3.5 text-sm font-bold text-black transition-all hover:shadow-lg hover:shadow-[var(--color-primary)]/25 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 skew-x-12" />
               {submitted ? t.contact.success : loading ? t.contact.sending : t.contact.send}
@@ -144,7 +156,7 @@ export default function Contact() {
             transition={{ duration: 0.7, delay: 0.3 }}
             className="lg:col-span-2 space-y-6"
           >
-            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 space-y-6">
+            <div className="portfolio-card space-y-6 rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
               <div className="flex items-start gap-4">
                 <div className="rounded-xl border border-[var(--color-primary)]/20 bg-[var(--color-primary)]/8 p-2.5 text-[var(--color-primary)]">
                   <Mail size={20} />
@@ -189,4 +201,3 @@ export default function Contact() {
     </section>
   );
 }
-
