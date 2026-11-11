@@ -88,6 +88,7 @@
     "send_error": "Não foi possível enviar. Tente novamente.",
     "captcha_required": "Conclua a verificação antes de enviar.",
     "captcha_unavailable": "Verificação indisponível. Entre em contato pelo WhatsApp.",
+    "human_confirmation": "Não sou um robô",
     "success": "Mensagem enviada! Retorno em breve.",
     "response_time_label": "Tempo de resposta",
     "location_label": "Localização",

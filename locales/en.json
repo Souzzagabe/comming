@@ -88,6 +88,7 @@
     "send_error": "Unable to send your message. Please try again.",
     "captcha_required": "Complete the verification before sending.",
     "captcha_unavailable": "Verification is unavailable. Please contact me via WhatsApp.",
+    "human_confirmation": "I'm not a robot",
     "success": "Message sent! I'll get back to you soon.",
     "response_time_label": "Response time",
     "location_label": "Location",

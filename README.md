@@ -1,14 +1,14 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Contact form and Cloudflare Turnstile
+## Contact form anti-spam
 
-Copy `.env.example` to `.env.local` and set:
+The contact form includes a human-confirmation checkbox and a hidden honeypot field by default. These are basic anti-spam checks, not a substitute for a dedicated CAPTCHA. For stronger bot protection, optionally configure Cloudflare Turnstile with:
 
 - `RESEND_API_KEY`: API key used to send contact form messages.
 - `NEXT_PUBLIC_TURNSTILE_SITE_KEY`: public site key from the Cloudflare Turnstile dashboard.
 - `TURNSTILE_SECRET_KEY`: private Turnstile secret key. Keep it server-side; do not use a `NEXT_PUBLIC_` prefix.
 
-Create a Turnstile widget in Cloudflare and allow the domains where the site runs, including `localhost` for local development. Set both Turnstile variables in the deployment environment to enable server-side CAPTCHA verification. Without Turnstile keys, the form uses a basic hidden honeypot field; this blocks simple bots but is not a replacement for CAPTCHA.
+Create a Turnstile widget in Cloudflare and allow the domains where the site runs, including `localhost` for local development. Set both Turnstile variables in the deployment environment to enable server-side CAPTCHA verification. When configured, Turnstile replaces the checkbox and its token is verified by the contact API.
 
 ## Getting Started
 

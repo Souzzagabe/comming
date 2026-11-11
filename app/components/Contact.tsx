@@ -3,7 +3,7 @@
 import { motion, useInView } from "framer-motion";
 import Script from "next/script";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
-import { Send, MessageCircle, Mail, MapPin, Clock } from "lucide-react";
+import { Send, MessageCircle, Mail, MapPin, Clock, ShieldCheck } from "lucide-react";
 import { useI18n } from "@/app/contexts/i18n-context";
 
 interface TurnstileOptions {
@@ -35,6 +35,7 @@ export default function Contact() {
   const [loading, setLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaError, setCaptchaError] = useState("");
+  const [humanConfirmed, setHumanConfirmed] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [turnstileReady, setTurnstileReady] = useState(false);
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
@@ -75,7 +76,7 @@ export default function Contact() {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (siteKey && !captchaToken) {
+    if ((siteKey && !captchaToken) || (!siteKey && !humanConfirmed)) {
       setCaptchaError(t.contact.captcha_required);
       return;
     }
@@ -96,12 +97,17 @@ export default function Contact() {
           message: formData.get("message"),
           website: formData.get("website"),
           captchaToken: captchaToken || undefined,
+          humanConfirmed,
         }),
       });
       const result: { success?: boolean; error?: string; code?: string } = await response.json();
 
       if (!response.ok || !result.success) {
-        if (result.code === "CAPTCHA_REQUIRED" || result.code === "CAPTCHA_INVALID") {
+        if (
+          result.code === "CAPTCHA_REQUIRED" ||
+          result.code === "CAPTCHA_INVALID" ||
+          result.code === "HUMAN_VERIFICATION_REQUIRED"
+        ) {
           setCaptchaError(t.contact.captcha_required);
         } else if (result.code === "CAPTCHA_UNAVAILABLE") {
           setCaptchaError(t.contact.captcha_unavailable);
@@ -109,6 +115,7 @@ export default function Contact() {
           setSubmitError(t.contact.send_error);
         }
         setCaptchaToken("");
+        setHumanConfirmed(false);
         if (turnstileId.current && window.turnstile) {
           window.turnstile.reset(turnstileId.current);
         }
@@ -118,6 +125,7 @@ export default function Contact() {
       setSubmitted(true);
       form.reset();
       setCaptchaToken("");
+      setHumanConfirmed(false);
       if (turnstileId.current && window.turnstile) {
         window.turnstile.reset(turnstileId.current);
       }
@@ -125,6 +133,7 @@ export default function Contact() {
     } catch {
       setSubmitError(t.contact.send_error);
       setCaptchaToken("");
+      setHumanConfirmed(false);
       if (turnstileId.current && window.turnstile) {
         window.turnstile.reset(turnstileId.current);
       }
@@ -259,6 +268,38 @@ export default function Contact() {
               </>
             )}
 
+            {!siteKey && (
+              <label className="flex min-h-14 cursor-pointer items-center justify-between gap-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] px-4 py-3">
+                <span className="flex items-center gap-3 text-sm text-[var(--color-foreground)]">
+                  <input
+                    type="checkbox"
+                    checked={humanConfirmed}
+                    onChange={(event) => {
+                      setHumanConfirmed(event.target.checked);
+                      setCaptchaError("");
+                    }}
+                    aria-invalid={Boolean(captchaError)}
+                    aria-describedby={captchaError ? "captcha-error" : undefined}
+                    className="size-5 cursor-pointer accent-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+                  />
+                  {t.contact.human_confirmation}
+                </span>
+                <ShieldCheck
+                  size={22}
+                  aria-hidden="true"
+                  className={
+                    humanConfirmed ? "text-[var(--color-primary)]" : "text-[var(--color-muted)]"
+                  }
+                />
+              </label>
+            )}
+
+            {captchaError && !siteKey && (
+              <p id="captcha-error" className="text-sm text-red-400" role="alert">
+                {captchaError}
+              </p>
+            )}
+
             {submitError && (
               <p className="text-sm text-red-400" role="alert">
                 {submitError}
@@ -267,7 +308,11 @@ export default function Contact() {
 
             <button
               type="submit"
-              disabled={Boolean(siteKey && !captchaToken) || loading || submitted}
+              disabled={
+                Boolean((siteKey && !captchaToken) || (!siteKey && !humanConfirmed)) ||
+                loading ||
+                submitted
+              }
               className="magnetic-button group relative flex min-h-12 items-center gap-2 overflow-hidden rounded-full bg-[var(--color-primary)] px-8 py-3.5 text-sm font-bold text-black transition-all hover:shadow-lg hover:shadow-[var(--color-primary)]/25 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 skew-x-12" />

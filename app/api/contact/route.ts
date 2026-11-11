@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Corpo da solicitação inválido." }, { status: 400 });
   }
 
-  const { name, email, subject, message, captchaToken } = payload;
+  const { name, email, subject, message, captchaToken, humanConfirmed } = payload;
   if (
     typeof name !== "string" ||
     typeof email !== "string" ||
@@ -54,6 +54,12 @@ export async function POST(req: NextRequest) {
 
   const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
   const captchaResponse = typeof captchaToken === "string" ? captchaToken : "";
+  if (!turnstileSecret && humanConfirmed !== true) {
+    return NextResponse.json(
+      { code: "HUMAN_VERIFICATION_REQUIRED", error: "Confirme a verificação antes de enviar." },
+      { status: 400 },
+    );
+  }
   if (turnstileSecret && !captchaResponse) {
     return NextResponse.json(
       { code: "CAPTCHA_REQUIRED", error: "Conclua a verificação antes de enviar." },
