@@ -23,7 +23,12 @@ export default function Hero() {
   const imageY = useTransform(smoothY, [-1, 1], [-8, 8]);
 
   function handleMouseMove(event: MouseEvent<HTMLElement>) {
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
     const bounds = sectionRef.current?.getBoundingClientRect();
     if (!bounds) return;
     pointerX.set(((event.clientX - bounds.left) / bounds.width) * 2 - 1);
@@ -46,26 +51,27 @@ export default function Hero() {
       <div className="pointer-events-none absolute inset-0 grid-overlay opacity-60" />
 
       <div className="hero-ambient-glow pointer-events-none absolute -right-36 top-1/4 size-[34rem] rounded-full bg-[var(--color-primary)] opacity-[0.07] blur-[120px]" />
+      <div className="hero-orbit pointer-events-none absolute right-[-18%] top-1/2 hidden aspect-square w-[min(48vw,44rem)] -translate-y-1/2 rounded-full border border-[var(--color-primary)]/10 lg:block" />
 
-      <motion.div
-        initial={false}
-        animate={{ opacity: 1, scale: 1, x: 0 }}
-        transition={{ duration: 1.1, ease: [0.2, 0.7, 0.2, 1] }}
-        style={{ x: imageX, y: imageY }}
-        className="hero-portrait hero-image-enter pointer-events-none absolute inset-0 z-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[60%]"
+      <div
+        className="hero-portrait pointer-events-none absolute inset-x-0 top-[8%] z-0 h-[78%] lg:inset-y-0 lg:left-auto lg:right-6 lg:h-full lg:w-[58%]"
         aria-hidden="true"
       >
-        <Image
-          src="/Gemini_Generated_Image_.png"
-          alt=""
-          fill
-          priority
-          sizes="(max-width: 1023px) 100vw, 60vw"
-          className="object-cover object-[72%_top] lg:object-contain lg:object-right-top"
-        />
-      </motion.div>
-
-      <div className="hero-portrait-blend pointer-events-none absolute inset-0 z-[1]" />
+        <motion.div
+          initial={false}
+          style={{ x: imageX, y: imageY }}
+          className="hero-image-reveal absolute inset-0"
+        >
+          <Image
+            src="/Gemini_Generated_Image_.png"
+            alt=""
+            fill
+            priority
+            sizes="(max-width: 1023px) 100vw, 58vw"
+            className="hero-art-fade object-contain object-right"
+          />
+        </motion.div>
+      </div>
 
       <div className="relative z-10 mx-auto grid min-h-[min(900px,100svh)] w-full max-w-7xl items-center px-5 pb-24 pt-32 sm:px-8 md:px-12 lg:grid-cols-[1.08fr_0.92fr] lg:gap-8 lg:px-16 lg:py-28">
         <div className="max-w-2xl">
