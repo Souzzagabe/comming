@@ -138,7 +138,7 @@ body {
   background: #f0cc31;
   color: #090909;
   opacity: 1;
-  transition: opacity 400ms ease;
+  transition: opacity 250ms ease;
 }
 
 .page-loader-exiting {
@@ -210,7 +210,7 @@ body {
   transform-origin: left;
   border-radius: inherit;
   background: #090909;
-  animation: page-loader-progress 1800ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  animation: page-loader-progress 750ms cubic-bezier(0.65, 0, 0.35, 1) both;
 }
 
 @keyframes page-loader-progress {
@@ -422,6 +422,7 @@ body {
 
 .hero-line {
   animation: hero-enter 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-play-state: paused;
 }
 
 .hero-line:nth-child(2) {
@@ -430,6 +431,7 @@ body {
 
 .hero-enter {
   animation: hero-enter 550ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-play-state: paused;
 }
 
 .hero-enter-1 {
@@ -454,6 +456,11 @@ body {
 
 .hero-enter-6 {
   animation-delay: 650ms;
+}
+
+body.page-ready .hero-line,
+body.page-ready .hero-enter {
+  animation-play-state: running;
 }
 
 @keyframes hero-art-float {
@@ -484,9 +491,11 @@ body {
 
 @keyframes hero-enter {
   from {
+    opacity: 0;
     transform: translateY(0.45em);
   }
   to {
+    opacity: 1;
     transform: translateY(0);
   }
 }

@@ -10,18 +10,21 @@ export default function PageLoader() {
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
+    document.body.classList.remove("page-ready");
     document.body.style.overflow = "hidden";
 
-    const exitTimer = window.setTimeout(() => setPhase("exiting"), 1600);
+    const exitTimer = window.setTimeout(() => setPhase("exiting"), 750);
     const doneTimer = window.setTimeout(() => {
       document.body.style.overflow = previousOverflow;
+      document.body.classList.add("page-ready");
       setPhase("done");
-    }, 2000);
+    }, 1000);
 
     return () => {
       window.clearTimeout(exitTimer);
       window.clearTimeout(doneTimer);
       document.body.style.overflow = previousOverflow;
+      document.body.classList.remove("page-ready");
     };
   }, []);
 
