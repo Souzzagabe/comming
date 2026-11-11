@@ -455,15 +455,19 @@ button:not(:disabled),
   letter-spacing: -0.075em;
   overflow-wrap: anywhere;
   text-shadow:
-    0 2px 1px rgb(255 255 255 / 18%),
-    0 10px 24px rgb(61 48 0 / 10%);
+    0 1px 0 rgb(255 255 255 / 28%),
+    0 2px 0 rgb(83 64 0 / 16%),
+    0 4px 0 rgb(83 64 0 / 8%),
+    0 8px 18px rgb(61 48 0 / 12%);
 }
 
 .hero-title-accent {
   color: #141414;
   text-shadow:
-    0 2px 1px rgb(255 255 255 / 12%),
-    0 8px 20px rgb(61 48 0 / 9%);
+    0 1px 0 rgb(255 255 255 / 20%),
+    0 2px 0 rgb(83 64 0 / 16%),
+    0 4px 0 rgb(83 64 0 / 8%),
+    0 7px 16px rgb(61 48 0 / 11%);
 }
 
 .hero-role {
@@ -499,10 +503,12 @@ button:not(:disabled),
   background: var(--hero-ink);
   color: var(--hero-yellow);
   box-shadow:
-    0 8px 18px rgb(46 36 0 / 20%),
-    0 2px 4px rgb(0 0 0 / 12%),
+    0 3px 0 #29250f,
+    0 8px 16px rgb(46 36 0 / 20%),
     inset 0 1px 0 rgb(255 255 255 / 10%);
-  text-shadow: 0 1px 5px rgb(255 255 255 / 12%);
+  text-shadow:
+    0 1px 0 rgb(255 255 255 / 16%),
+    0 2px 4px rgb(0 0 0 / 30%);
   transition:
     transform 180ms ease,
     box-shadow 180ms ease,
@@ -511,8 +517,8 @@ button:not(:disabled),
 
 .hero-primary-button:hover {
   box-shadow:
-    0 12px 24px rgb(46 36 0 / 24%),
-    0 3px 6px rgb(0 0 0 / 14%),
+    0 4px 0 #29250f,
+    0 12px 22px rgb(46 36 0 / 24%),
     inset 0 1px 0 rgb(255 255 255 / 12%);
 }
 
@@ -520,9 +526,12 @@ button:not(:disabled),
   border: 1px solid rgb(0 0 0 / 42%);
   color: var(--hero-ink);
   box-shadow:
-    0 5px 14px rgb(46 36 0 / 9%),
+    0 2px 0 rgb(0 0 0 / 22%),
+    0 6px 12px rgb(46 36 0 / 10%),
     inset 0 1px 0 rgb(255 255 255 / 16%);
-  text-shadow: 0 1px 5px rgb(255 255 255 / 18%);
+  text-shadow:
+    0 1px 0 rgb(255 255 255 / 28%),
+    0 2px 4px rgb(61 48 0 / 10%);
   transition:
     transform 180ms ease,
     box-shadow 180ms ease,
@@ -532,7 +541,8 @@ button:not(:disabled),
 .hero-secondary-button:hover {
   background: rgb(0 0 0 / 7%);
   box-shadow:
-    0 8px 18px rgb(46 36 0 / 13%),
+    0 3px 0 rgb(0 0 0 / 24%),
+    0 9px 16px rgb(46 36 0 / 14%),
     inset 0 1px 0 rgb(255 255 255 / 18%);
 }
 
@@ -793,6 +803,30 @@ body.page-ready .hero-enter {
 
   .magnetic-button:hover {
     transform: translateY(-2px);
+  }
+
+  .hero-primary-button:hover,
+  .hero-secondary-button:hover {
+    transform: perspective(500px) rotateX(4deg) translateY(-2px);
+  }
+
+  .hero-primary-button:active,
+  .hero-secondary-button:active {
+    transform: translateY(2px);
+  }
+
+  .hero-primary-button:active {
+    box-shadow:
+      0 1px 0 #29250f,
+      0 3px 6px rgb(46 36 0 / 16%),
+      inset 0 1px 0 rgb(255 255 255 / 10%);
+  }
+
+  .hero-secondary-button:active {
+    box-shadow:
+      0 1px 0 rgb(0 0 0 / 18%),
+      0 2px 5px rgb(46 36 0 / 8%),
+      inset 0 1px 0 rgb(255 255 255 / 16%);
   }
 }
 
