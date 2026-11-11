@@ -53,7 +53,7 @@ export default function Header() {
       className={`fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300 ${
         scrolled
           ? "border-[var(--color-border)] bg-black/85 backdrop-blur-xl"
-          : "border-transparent bg-gradient-to-b from-black/50 to-transparent"
+          : "border-transparent bg-transparent"
       }`}
     >
       <nav
@@ -62,7 +62,9 @@ export default function Header() {
       >
         <button
           onClick={() => scrollTo("home")}
-          className="rounded-lg text-2xl font-bold tracking-[-0.09em] text-[var(--color-foreground)]"
+          className={`rounded-lg text-2xl font-bold tracking-[-0.09em] ${
+            scrolled ? "text-[var(--color-foreground)]" : "text-black"
+          }`}
           aria-label="GS. — Home"
         >
           GS<span className="text-[var(--color-primary)]">.</span>
@@ -75,9 +77,13 @@ export default function Header() {
                 onClick={() => scrollTo(link.href.slice(1))}
                 aria-current={active === link.href ? "location" : undefined}
                 className={`rounded-full px-4 py-2 text-sm transition-colors ${
-                  active === link.href
-                    ? "bg-[var(--color-surface)] text-[var(--color-foreground)]"
-                    : "text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
+                  scrolled
+                    ? active === link.href
+                      ? "bg-[var(--color-surface)] text-[var(--color-foreground)]"
+                      : "text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
+                    : active === link.href
+                      ? "bg-black/10 text-black"
+                      : "text-black/70 hover:text-black"
                 }`}
               >
                 {link.label}
@@ -89,7 +95,11 @@ export default function Header() {
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => setLocale(locale === "pt" ? "en" : "pt")}
-            className="inline-flex min-h-11 items-center gap-1 rounded-full border border-[var(--color-border)] px-3 text-xs font-bold text-[var(--color-muted)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+            className={`inline-flex min-h-11 items-center gap-1 rounded-full border px-3 text-xs font-bold transition-colors ${
+              scrolled
+                ? "border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                : "border-black/30 text-black/75 hover:border-black hover:text-black"
+            }`}
             aria-label={
               locale === "pt" ? "Change language to English" : "Mudar idioma para português"
             }
@@ -108,7 +118,11 @@ export default function Header() {
 
           <button
             onClick={() => setMobileOpen((open) => !open)}
-            className="inline-flex size-11 items-center justify-center rounded-full border border-[var(--color-border)] text-[var(--color-foreground)] md:hidden"
+            className={`inline-flex size-11 items-center justify-center rounded-full border md:hidden ${
+              scrolled
+                ? "border-[var(--color-border)] text-[var(--color-foreground)]"
+                : "border-black/30 text-black"
+            }`}
             aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
             aria-expanded={mobileOpen}
             aria-controls="mobile-navigation"

@@ -19,8 +19,8 @@ export default function Hero() {
   const pointerY = useMotionValue(0);
   const smoothX = useSpring(pointerX, { stiffness: 45, damping: 22, mass: 0.6 });
   const smoothY = useSpring(pointerY, { stiffness: 45, damping: 22, mass: 0.6 });
-  const imageX = useTransform(smoothX, [-1, 1], [12, -12]);
-  const imageY = useTransform(smoothY, [-1, 1], [-8, 8]);
+  const imageX = useTransform(smoothX, [-1, 1], [10, -10]);
+  const imageY = useTransform(smoothY, [-1, 1], [-7, 7]);
 
   function handleMouseMove(event: MouseEvent<HTMLElement>) {
     if (
@@ -29,6 +29,7 @@ export default function Hero() {
     ) {
       return;
     }
+
     const bounds = sectionRef.current?.getBoundingClientRect();
     if (!bounds) return;
     pointerX.set(((event.clientX - bounds.left) / bounds.width) * 2 - 1);
@@ -46,141 +47,92 @@ export default function Hero() {
       ref={sectionRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="relative isolate flex min-h-[min(900px,100svh)] items-center overflow-hidden bg-[var(--color-background)]"
+      className="hero-section relative isolate overflow-hidden"
     >
-      <div className="pointer-events-none absolute inset-0 grid-overlay opacity-60" />
+      <div className="hero-grid pointer-events-none absolute inset-0" />
+      <div className="hero-ambient-glow pointer-events-none absolute" />
 
-      <div className="hero-ambient-glow pointer-events-none absolute -right-36 top-1/4 size-[34rem] rounded-full bg-[var(--color-primary)] opacity-[0.07] blur-[120px]" />
-      <div className="hero-orbit pointer-events-none absolute right-[-18%] top-1/2 hidden aspect-square w-[min(48vw,44rem)] -translate-y-1/2 rounded-full border border-[var(--color-primary)]/10 lg:block" />
-
-      <div
-        className="hero-portrait pointer-events-none absolute inset-x-0 top-[8%] z-0 h-[78%] lg:inset-y-0 lg:left-auto lg:right-6 lg:h-full lg:w-[58%]"
-        aria-hidden="true"
-      >
-        <motion.div
-          initial={false}
-          style={{ x: imageX, y: imageY }}
-          className="hero-image-reveal absolute inset-0"
-        >
-          <Image
-            src="/Gemini_Generated_Image_.png"
-            alt=""
-            fill
-            priority
-            sizes="(max-width: 1023px) 100vw, 58vw"
-            className="hero-art-fade object-contain object-right"
-          />
-        </motion.div>
-      </div>
-
-      <div className="relative z-10 mx-auto grid min-h-[min(900px,100svh)] w-full max-w-7xl items-center px-5 pb-24 pt-32 sm:px-8 md:px-12 lg:grid-cols-[1.08fr_0.92fr] lg:gap-8 lg:px-16 lg:py-28">
-        <div className="max-w-2xl">
+      <div className="hero-layout relative z-10 mx-auto">
+        <div className="hero-art-frame relative">
+          <div className="hero-art-orbit pointer-events-none absolute inset-0" />
           <motion.div
             initial={false}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.1 }}
-            className="hero-enter hero-enter-1 mb-7 inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-black/45 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-primary)] backdrop-blur-md sm:text-xs"
+            style={{ x: imageX, y: imageY }}
+            className="hero-image-reveal absolute inset-0"
+            aria-hidden="true"
           >
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-[var(--color-primary)] opacity-50" />
-              <span className="relative inline-flex size-2 rounded-full bg-[var(--color-primary)]" />
+            <Image
+              src="/Gemini_Generated_Image_.png"
+              alt=""
+              fill
+              priority
+              sizes="(max-width: 767px) 100vw, (max-width: 1023px) 75vw, 48vw"
+              style={{ objectFit: "contain", objectPosition: "center" }}
+              className="hero-art-image object-contain"
+            />
+          </motion.div>
+        </div>
+
+        <div className="hero-copy">
+          <div className="hero-availability hero-enter hero-enter-1 mb-6 inline-flex items-center gap-2.5 rounded-full px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] sm:text-xs">
+            <span className="hero-status-dot relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full opacity-50" />
+              <span className="relative inline-flex size-2 rounded-full" />
             </span>
             {t.hero.available}
-          </motion.div>
+          </div>
 
-          <h1 className="max-w-[12ch] text-[clamp(3rem,6.4vw,6.5rem)] font-bold leading-[0.92] tracking-[-0.075em]">
-            <motion.span
-              initial={false}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.16, ease: [0.2, 0.7, 0.2, 1] }}
-              className="hero-line block"
-            >
-              {t.hero.title1}
-            </motion.span>
-            <motion.span
-              initial={false}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.28, ease: [0.2, 0.7, 0.2, 1] }}
-              className="hero-line block text-[var(--color-primary)]"
-            >
-              {t.hero.title2}
-            </motion.span>
+          <h1 className="hero-title">
+            <span className="hero-line block">{t.hero.title1}</span>
+            <span className="hero-line hero-title-accent block">{t.hero.title2}</span>
           </h1>
 
-          <motion.p
-            initial={false}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.38 }}
-            className="hero-enter hero-enter-2 mt-6 max-w-xl text-xs font-medium uppercase leading-relaxed tracking-[0.12em] text-[var(--color-muted)] sm:text-sm"
-          >
+          <p className="hero-role hero-enter hero-enter-2 mt-5 text-xs font-medium uppercase leading-relaxed tracking-[0.12em] sm:text-sm">
             {t.hero.role}
-          </motion.p>
-          <motion.p
-            initial={false}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.46 }}
-            className="hero-enter hero-enter-3 mt-4 max-w-lg text-sm leading-relaxed text-[var(--color-muted)] sm:text-base"
-          >
+          </p>
+          <p className="hero-description hero-enter hero-enter-3 mt-4 text-sm leading-relaxed sm:text-base">
             {t.hero.description}
-          </motion.p>
+          </p>
 
-          <motion.div
-            initial={false}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.54 }}
-            className="hero-enter hero-enter-4 mt-7 flex flex-wrap gap-2"
+          <div
+            className="hero-tech-list hero-enter hero-enter-4 mt-6 flex flex-wrap gap-2"
             aria-label="Tecnologias"
           >
             {TECHS.map((tech) => (
-              <span
-                key={tech}
-                className="rounded-full border border-white/15 bg-black/35 px-3 py-1.5 font-mono text-[10px] text-[var(--color-foreground)] backdrop-blur-md transition-colors hover:border-[var(--color-primary)]"
-              >
+              <span key={tech} className="hero-tech rounded-full px-3 py-1.5 font-mono text-[10px]">
                 {tech}
               </span>
             ))}
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={false}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.62 }}
-            className="hero-enter hero-enter-5 mt-8 flex flex-wrap items-center gap-3"
-          >
+          <div className="hero-actions hero-enter hero-enter-5 mt-7 flex flex-wrap items-center gap-3">
             <button
               onClick={() => scrollTo("servicos")}
-              className="magnetic-button inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--color-primary)] px-6 py-3 text-sm font-bold text-black transition-transform"
+              className="magnetic-button hero-primary-button inline-flex min-h-12 items-center gap-2 rounded-full px-6 py-3 text-sm font-bold transition-transform"
             >
               {t.hero.cta_projects}
               <ArrowRight size={16} aria-hidden="true" />
             </button>
             <button
               onClick={() => scrollTo("contato")}
-              className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/20 bg-black/20 px-6 py-3 text-sm font-semibold text-[var(--color-foreground)] backdrop-blur-md transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+              className="hero-secondary-button inline-flex min-h-12 items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-colors"
             >
               {t.hero.cta_contact}
             </button>
-          </motion.div>
+          </div>
         </div>
 
-        <div className="pointer-events-none relative hidden h-full min-h-[540px] lg:block">
-          <motion.div
-            initial={false}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.65 }}
-            className="hero-enter hero-enter-6 absolute bottom-8 right-1 flex items-center gap-3 rounded-full border border-white/15 bg-black/55 px-5 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-foreground)] backdrop-blur-md"
-          >
-            <span className="text-sm font-bold tracking-[-0.08em]">
-              GS<span className="text-[var(--color-primary)]">.</span>
-            </span>
-            <span className="h-4 w-px bg-white/25" />
-            Porto Alegre, RS
-          </motion.div>
+        <div className="hero-location hero-enter hero-enter-6 absolute flex items-center gap-3 rounded-full px-5 py-3 font-mono text-[10px] uppercase tracking-[0.18em]">
+          <span className="text-sm font-bold tracking-[-0.08em]">
+            GS<span className="hero-location-accent">.</span>
+          </span>
+          <span className="hero-location-divider h-4 w-px" />
+          Porto Alegre, RS
         </div>
       </div>
 
-      <div className="absolute bottom-5 left-5 z-10 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-muted)] sm:bottom-8 sm:left-8 lg:left-16">
-        <ArrowDown size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
+      <div className="hero-scroll absolute bottom-6 left-5 z-10 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] sm:left-8 lg:left-12">
+        <ArrowDown size={14} aria-hidden="true" />
         {t.hero.scroll}
       </div>
     </section>
