@@ -1,5 +1,15 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Contact form and Cloudflare Turnstile
+
+Copy `.env.example` to `.env.local` and set:
+
+- `RESEND_API_KEY`: API key used to send contact form messages.
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY`: public site key from the Cloudflare Turnstile dashboard.
+- `TURNSTILE_SECRET_KEY`: private Turnstile secret key. Keep it server-side; do not use a `NEXT_PUBLIC_` prefix.
+
+Create a Turnstile widget in Cloudflare and allow the domains where the site runs, including `localhost` for local development. Set the same variables in the deployment environment. The contact endpoint rejects submissions if server-side verification is missing or fails.
+
 ## Getting Started
 
 First, run the development server:

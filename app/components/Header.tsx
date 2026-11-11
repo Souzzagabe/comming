@@ -22,6 +22,15 @@ export default function Header() {
     { href: "#contato", label: t.nav.contact },
   ];
 
+  const localeColor = (selected: boolean) =>
+    selected
+      ? scrolled
+        ? "var(--color-primary)"
+        : "#000000"
+      : scrolled
+        ? "var(--color-muted)"
+        : "rgb(0 0 0 / 55%)";
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -106,17 +115,9 @@ export default function Header() {
               locale === "pt" ? "Change language to English" : "Mudar idioma para português"
             }
           >
-            <span
-              className={locale === "pt" && scrolled ? "text-[var(--color-primary)]" : "text-black"}
-            >
-              PT
-            </span>
+            <span style={{ color: localeColor(locale === "pt") }}>PT</span>
             <span aria-hidden="true">/</span>
-            <span
-              className={locale === "en" && scrolled ? "text-[var(--color-primary)]" : "text-black"}
-            >
-              EN
-            </span>
+            <span style={{ color: localeColor(locale === "en") }}>EN</span>
           </button>
 
           <button

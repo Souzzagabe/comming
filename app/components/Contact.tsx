@@ -1,47 +1,135 @@
 ﻿"use client";
 
 import { motion, useInView } from "framer-motion";
-import { useRef, useState, type FormEvent } from "react";
+import Script from "next/script";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Send, MessageCircle, Mail, MapPin, Clock } from "lucide-react";
 import { useI18n } from "@/app/contexts/i18n-context";
+
+interface TurnstileOptions {
+  sitekey: string;
+  action: "contact";
+  theme: "dark";
+  callback: (token: string) => void;
+  "expired-callback": () => void;
+  "error-callback": () => void;
+}
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: HTMLElement, options: TurnstileOptions) => string;
+      remove: (widgetId: string) => void;
+      reset: (widgetId: string) => void;
+    };
+  }
+}
 
 export default function Contact() {
   const { t } = useI18n();
   const ref = useRef(null);
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const turnstileId = useRef<string | null>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaError, setCaptchaError] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const [turnstileReady, setTurnstileReady] = useState(false);
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    const form = e.currentTarget;
-    const data = {
-      name: (form.elements.namedItem("name") as HTMLInputElement).value,
-      email: (form.elements.namedItem("email") as HTMLInputElement).value,
-      subject: (form.elements.namedItem("subject") as HTMLInputElement).value,
-      message: (form.elements.namedItem("message") as HTMLTextAreaElement).value,
+  const renderTurnstile = useCallback(() => {
+    if (!siteKey || !window.turnstile || !turnstileRef.current || turnstileId.current) return;
+
+    turnstileId.current = window.turnstile.render(turnstileRef.current, {
+      sitekey: siteKey,
+      action: "contact",
+      theme: "dark",
+      callback: (token) => {
+        setCaptchaToken(token);
+        setCaptchaError("");
+      },
+      "expired-callback": () => {
+        setCaptchaToken("");
+        setCaptchaError(t.contact.captcha_required);
+      },
+      "error-callback": () => {
+        setCaptchaToken("");
+        setCaptchaError(t.contact.captcha_unavailable);
+      },
+    });
+  }, [siteKey, t.contact.captcha_required, t.contact.captcha_unavailable]);
+
+  useEffect(() => {
+    if (!turnstileReady) return;
+    renderTurnstile();
+
+    return () => {
+      if (turnstileId.current && window.turnstile) {
+        window.turnstile.remove(turnstileId.current);
+        turnstileId.current = null;
+      }
     };
-    fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    })
-      .then((res) => res.json())
-      .then((body) => {
-        setLoading(false);
-        if (body.success) {
-          setSubmitted(true);
-          form.reset();
-          setTimeout(() => setSubmitted(false), 5000);
-        } else {
-          alert(body.error ?? "Erro ao enviar. Tente novamente.");
-        }
-      })
-      .catch(() => {
-        setLoading(false);
-        alert("Erro de rede. Tente novamente.");
+  }, [renderTurnstile, turnstileReady]);
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!captchaToken) {
+      setCaptchaError(siteKey ? t.contact.captcha_required : t.contact.captcha_unavailable);
+      return;
+    }
+
+    setLoading(true);
+    setSubmitError("");
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.get("name"),
+          email: formData.get("email"),
+          subject: formData.get("subject"),
+          message: formData.get("message"),
+          captchaToken,
+        }),
       });
+      const result: { success?: boolean; error?: string; code?: string } = await response.json();
+
+      if (!response.ok || !result.success) {
+        if (result.code === "CAPTCHA_REQUIRED" || result.code === "CAPTCHA_INVALID") {
+          setCaptchaError(t.contact.captcha_required);
+        } else if (result.code === "CAPTCHA_UNAVAILABLE") {
+          setCaptchaError(t.contact.captcha_unavailable);
+        } else {
+          setSubmitError(t.contact.send_error);
+        }
+        setCaptchaToken("");
+        if (turnstileId.current && window.turnstile) {
+          window.turnstile.reset(turnstileId.current);
+        }
+        return;
+      }
+
+      setSubmitted(true);
+      form.reset();
+      setCaptchaToken("");
+      if (turnstileId.current && window.turnstile) {
+        window.turnstile.reset(turnstileId.current);
+      }
+      window.setTimeout(() => setSubmitted(false), 5000);
+    } catch {
+      setSubmitError(t.contact.send_error);
+      setCaptchaToken("");
+      if (turnstileId.current && window.turnstile) {
+        window.turnstile.reset(turnstileId.current);
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -84,6 +172,7 @@ export default function Contact() {
                 </label>
                 <input
                   id="name"
+                  name="name"
                   type="text"
                   required
                   className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] px-4 py-3 text-sm text-[var(--color-foreground)] placeholder:text-[var(--color-muted)] focus:outline-none focus:border-[var(--color-primary)]/70 transition-all"
@@ -99,6 +188,7 @@ export default function Contact() {
                 </label>
                 <input
                   id="email"
+                  name="email"
                   type="email"
                   required
                   className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] px-4 py-3 text-sm text-[var(--color-foreground)] placeholder:text-[var(--color-muted)] focus:outline-none focus:border-[var(--color-primary)]/70 transition-all"
@@ -116,6 +206,7 @@ export default function Contact() {
               </label>
               <input
                 id="subject"
+                name="subject"
                 type="text"
                 required
                 className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] px-4 py-3 text-sm text-[var(--color-foreground)] placeholder:text-[var(--color-muted)] focus:outline-none focus:border-[var(--color-primary)]/70 transition-all"
@@ -132,6 +223,7 @@ export default function Contact() {
               </label>
               <textarea
                 id="message"
+                name="message"
                 required
                 rows={5}
                 className="w-full resize-none rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] px-4 py-3 text-sm text-[var(--color-foreground)] placeholder:text-[var(--color-muted)] focus:outline-none focus:border-[var(--color-primary)]/70 transition-all"
@@ -139,9 +231,36 @@ export default function Contact() {
               />
             </div>
 
+            {siteKey ? (
+              <>
+                <Script
+                  src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+                  strategy="lazyOnload"
+                  onReady={() => setTurnstileReady(true)}
+                  onError={() => setCaptchaError(t.contact.captcha_unavailable)}
+                />
+                <div ref={turnstileRef} />
+                {captchaError && (
+                  <p className="text-sm text-red-400" role="alert">
+                    {captchaError}
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-red-400" role="alert">
+                {t.contact.captcha_unavailable}
+              </p>
+            )}
+
+            {submitError && (
+              <p className="text-sm text-red-400" role="alert">
+                {submitError}
+              </p>
+            )}
+
             <button
               type="submit"
-              disabled={loading || submitted}
+              disabled={!siteKey || !captchaToken || loading || submitted}
               className="magnetic-button group relative flex min-h-12 items-center gap-2 overflow-hidden rounded-full bg-[var(--color-primary)] px-8 py-3.5 text-sm font-bold text-black transition-all hover:shadow-lg hover:shadow-[var(--color-primary)]/25 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 skew-x-12" />
