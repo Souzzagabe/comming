@@ -30,6 +30,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Corpo da solicitação inválido." }, { status: 400 });
   }
 
+  const { website } = payload;
+  if (typeof website === "string" && website.trim()) {
+    return NextResponse.json({ success: true });
+  }
+  if (website !== undefined && typeof website !== "string") {
+    return NextResponse.json({ error: "Corpo da solicitação inválido." }, { status: 400 });
+  }
+
   const { name, email, subject, message, captchaToken } = payload;
   if (
     typeof name !== "string" ||
@@ -44,19 +52,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Campos obrigatórios faltando." }, { status: 400 });
   }
 
-  if (typeof captchaToken !== "string" || !captchaToken) {
+  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+  const captchaResponse = typeof captchaToken === "string" ? captchaToken : "";
+  if (turnstileSecret && !captchaResponse) {
     return NextResponse.json(
       { code: "CAPTCHA_REQUIRED", error: "Conclua a verificação antes de enviar." },
       { status: 400 },
     );
   }
-
-  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
-  if (!turnstileSecret) {
+  if (!turnstileSecret && captchaResponse) {
     return NextResponse.json(
       { code: "CAPTCHA_UNAVAILABLE", error: "Verificação antispam não configurada." },
       { status: 503 },
     );
+  }
+
+  if (!turnstileSecret) {
+    return sendContactMessage(name, email, subject, message);
   }
 
   let verificationResponse: Response;
@@ -66,7 +78,7 @@ export async function POST(req: NextRequest) {
       {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ secret: turnstileSecret, response: captchaToken }),
+        body: new URLSearchParams({ secret: turnstileSecret, response: captchaResponse }),
         cache: "no-store",
       },
     );
@@ -100,6 +112,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  return sendContactMessage(name, email, subject, message);
+}
+
+async function sendContactMessage(name: string, email: string, subject: string, message: string) {
   const resendApiKey = process.env.RESEND_API_KEY;
   if (!resendApiKey) {
     return NextResponse.json({ error: "Envio de mensagens não configurado." }, { status: 503 });

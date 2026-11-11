@@ -75,8 +75,8 @@ export default function Contact() {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!captchaToken) {
-      setCaptchaError(siteKey ? t.contact.captcha_required : t.contact.captcha_unavailable);
+    if (siteKey && !captchaToken) {
+      setCaptchaError(t.contact.captcha_required);
       return;
     }
 
@@ -94,7 +94,8 @@ export default function Contact() {
           email: formData.get("email"),
           subject: formData.get("subject"),
           message: formData.get("message"),
-          captchaToken,
+          website: formData.get("website"),
+          captchaToken: captchaToken || undefined,
         }),
       });
       const result: { success?: boolean; error?: string; code?: string } = await response.json();
@@ -160,8 +161,18 @@ export default function Contact() {
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="lg:col-span-3 space-y-5 rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-8"
+            className="relative lg:col-span-3 space-y-5 rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-8"
           >
+            <div className="contact-honeypot" aria-hidden="true">
+              <label htmlFor="contact-website">Website</label>
+              <input
+                id="contact-website"
+                name="website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+              />
+            </div>
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
                 <label
@@ -231,7 +242,7 @@ export default function Contact() {
               />
             </div>
 
-            {siteKey ? (
+            {siteKey && (
               <>
                 <Script
                   src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
@@ -246,10 +257,6 @@ export default function Contact() {
                   </p>
                 )}
               </>
-            ) : (
-              <p className="text-sm text-red-400" role="alert">
-                {t.contact.captcha_unavailable}
-              </p>
             )}
 
             {submitError && (
@@ -260,7 +267,7 @@ export default function Contact() {
 
             <button
               type="submit"
-              disabled={!siteKey || !captchaToken || loading || submitted}
+              disabled={Boolean(siteKey && !captchaToken) || loading || submitted}
               className="magnetic-button group relative flex min-h-12 items-center gap-2 overflow-hidden rounded-full bg-[var(--color-primary)] px-8 py-3.5 text-sm font-bold text-black transition-all hover:shadow-lg hover:shadow-[var(--color-primary)]/25 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 skew-x-12" />
