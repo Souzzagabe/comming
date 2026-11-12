@@ -27,6 +27,19 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Monitores grandes: escala toda a UI (tudo em rem) em vez de deixar o site "pequeno" no meio da tela */
+@media (min-width: 1920px) {
+  html {
+    font-size: 18px;
+  }
+}
+
+@media (min-width: 2400px) {
+  html {
+    font-size: 20px;
+  }
+}
+
 body {
   background: var(--color-background);
   color: var(--color-foreground);
@@ -40,6 +53,10 @@ main h2 {
     0 1px 0 rgb(255 255 255 / 8%),
     0 2px 0 rgb(0 0 0 / 55%),
     0 6px 14px rgb(0 0 0 / 28%);
+}
+
+main h2.heading-flat {
+  text-shadow: none;
 }
 
 a[href],
@@ -150,66 +167,121 @@ button:not(:disabled),
   }
 }
 
+/* ─── Page loader ─── */
 .page-loader {
+  --pl-yellow: #f0cc31;
+  --pl-ink: #090909;
+  --pl-ease: cubic-bezier(0.76, 0, 0.24, 1);
+
   position: fixed;
   inset: 0;
   z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   overflow: hidden;
-  background: #f0cc31;
-  color: #090909;
-  opacity: 1;
-  transition: opacity 250ms ease;
+  color: var(--pl-ink);
 }
 
 .page-loader-exiting {
-  opacity: 0;
   pointer-events: none;
 }
 
+/* Cortinas: duas metades amarelas que se abrem revelando o hero */
+.page-loader-curtain {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 50.5%; /* sobreposição evita linha entre as metades */
+  background: var(--pl-yellow);
+  transition: transform 700ms var(--pl-ease);
+  will-change: transform;
+}
+
+.page-loader-curtain-top {
+  top: 0;
+  border-bottom: 2px solid var(--pl-ink);
+}
+
+.page-loader-curtain-bottom {
+  bottom: 0;
+  border-top: 2px solid var(--pl-ink);
+}
+
+.page-loader-exiting .page-loader-curtain-top {
+  transform: translate3d(0, -101%, 0);
+}
+
+.page-loader-exiting .page-loader-curtain-bottom {
+  transform: translate3d(0, 101%, 0);
+}
+
+/* Mesmo grid do hero, some junto com o conteúdo */
 .page-loader-grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgb(0 0 0 / 3%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(0 0 0 / 3%) 1px, transparent 1px);
+    linear-gradient(rgb(0 0 0 / 4%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(0 0 0 / 4%) 1px, transparent 1px);
   background-size: 64px 64px;
-}
-
-.page-loader-topline {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  justify-content: space-between;
-  padding: clamp(1.25rem, 4vw, 2.5rem) clamp(1.25rem, 6vw, 5rem);
-  font-family: var(--font-mono), monospace;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-}
-
-.page-loader-topline span:first-child {
-  font-family: var(--font-sans), sans-serif;
-  font-size: 1.35rem;
-  letter-spacing: -0.1em;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 48%, #000 15%, transparent 78%);
+  transition: opacity 300ms ease;
 }
 
 .page-loader-content {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
+  animation: page-loader-enter 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition:
+    opacity 350ms ease,
+    transform 500ms var(--pl-ease);
+}
+
+.page-loader-exiting .page-loader-content {
+  opacity: 0;
+  transform: scale(0.94);
+}
+
+.page-loader-exiting .page-loader-grid {
+  opacity: 0;
+}
+
+/* Retrato + anel de progresso */
+.page-loader-stage {
+  position: relative;
+  width: min(68vw, 300px);
+  aspect-ratio: 1;
+}
+
+.page-loader-ring {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  padding: 1.5rem;
+  height: 100%;
+  overflow: visible;
+  transform: rotate(-90deg);
+}
+
+.page-loader-ring circle {
+  fill: none;
+  stroke-width: 1.2;
+}
+
+.page-loader-ring-track {
+  stroke: rgb(0 0 0 / 16%);
+}
+
+.page-loader-ring-bar {
+  stroke: var(--pl-ink);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 120ms linear;
 }
 
 .page-loader-portrait {
-  position: relative;
-  width: min(78vw, 360px);
-  height: min(52svh, 420px);
-  min-height: 220px;
+  position: absolute;
+  inset: 8%;
 }
 
 .page-loader-image {
@@ -217,28 +289,27 @@ button:not(:disabled),
   object-position: center;
 }
 
-.page-loader-progress {
-  width: min(58vw, 240px);
-  height: 3px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgb(0 0 0 / 16%);
+/* Contador, mesma voz tipográfica dos títulos do site */
+.page-loader-counter {
+  margin: 0;
+  font-family: var(--font-sans), sans-serif;
+  font-size: clamp(2.5rem, 9vw, 4rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 1;
 }
 
-.page-loader-progress span {
-  display: block;
-  width: 100%;
-  height: 100%;
-  transform: scaleX(0);
-  transform-origin: left;
-  border-radius: inherit;
-  background: #090909;
-  animation: page-loader-progress 750ms cubic-bezier(0.65, 0, 0.35, 1) both;
+.page-loader-counter span {
+  margin-left: 0.08em;
+  font-size: 0.5em;
+  letter-spacing: 0;
 }
 
-@keyframes page-loader-progress {
-  to {
-    transform: scaleX(1);
+@keyframes page-loader-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0) scale(0.97);
   }
 }
 
@@ -294,7 +365,7 @@ button:not(:disabled),
 
 .hero-layout {
   display: grid;
-  width: min(100%, 1440px);
+  width: min(100%, 90rem);
   min-height: 100svh;
   grid-template-areas: "copy art";
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
@@ -607,14 +678,18 @@ button:not(:disabled),
 }
 
 .hero-title-accent {
-  position: relative;
   display: block;
-  width: fit-content;
   color: var(--hero-ink);
 }
 
+.hero-underline {
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+}
+
 /* Sublinhado que "desenha" depois das palavras (scaleX = compositor) */
-.hero-title-accent::after {
+.hero-underline::after {
   position: absolute;
   right: 0;
   bottom: -0.02em;
@@ -755,7 +830,7 @@ body.page-ready .hero-pebble,
 body.page-ready .hero-art-frame,
 body.page-ready .hero-art-orbit,
 body.page-ready .hero-marquee,
-body.page-ready .hero-title-accent::after {
+body.page-ready .hero-underline::after {
   animation-play-state: running;
 }
 
@@ -975,9 +1050,13 @@ body.page-ready .hero-title-accent::after {
   }
 }
 
-@media (max-width: 1099px) {
+/* ── Responsivo do hero ──
+   ≥ 960px  : duas colunas (texto | arte)
+   < 960px  : empilhado e centralizado
+   ≤ 480px  : ajustes de celular
+   paisagem baixa (celular deitado): duas colunas compactas */
+@media (max-width: 959px) {
   .hero-layout {
-    min-height: 100svh;
     grid-template-areas:
       "art"
       "copy";
@@ -987,8 +1066,8 @@ body.page-ready .hero-title-accent::after {
   }
 
   .hero-art-frame {
-    width: min(100%, 34rem);
-    height: clamp(210px, 34svh, 330px);
+    width: min(100%, 38rem);
+    height: clamp(240px, 36svh, 420px);
     min-height: 0;
     margin-inline: auto;
   }
@@ -1008,11 +1087,24 @@ body.page-ready .hero-title-accent::after {
   }
 
   .hero-copy {
-    max-width: 42rem;
+    text-align: center;
+  }
+
+  .hero-meta,
+  .hero-availability,
+  .hero-tech-list,
+  .hero-actions {
+    justify-content: center;
+  }
+
+  .hero-role,
+  .hero-description {
+    margin-inline: auto;
   }
 
   .hero-title {
     font-size: clamp(2.5rem, 8vw, 5rem);
+    text-wrap: balance;
   }
 
   .hero-scroll {
@@ -1021,48 +1113,18 @@ body.page-ready .hero-title-accent::after {
 }
 
 @media (max-width: 480px) {
-  .page-loader-portrait {
-    width: min(78vw, 300px);
-    height: min(48svh, 320px);
-    min-height: 200px;
-  }
-
   .hero-layout {
     padding: 80px 1.25rem 132px;
   }
 
   .hero-art-frame {
     width: min(100%, 20rem);
-    height: clamp(245px, 33svh, 290px);
-  }
-
-  .hero-copy {
-    text-align: center;
-  }
-
-  .hero-meta,
-  .hero-availability {
-    justify-content: center;
+    height: clamp(230px, 32svh, 290px);
   }
 
   .hero-title {
     font-size: clamp(2.2rem, 10.6vw, 3.25rem);
     letter-spacing: -0.07em;
-    text-wrap: balance;
-  }
-
-  .hero-title-accent {
-    margin-inline: auto;
-  }
-
-  .hero-role,
-  .hero-description {
-    margin-inline: auto;
-  }
-
-  .hero-tech-list,
-  .hero-actions {
-    justify-content: center;
   }
 
   .hero-description {
@@ -1072,6 +1134,57 @@ body.page-ready .hero-title-accent::after {
   .hero-scroll {
     bottom: 5rem;
     left: 1.25rem;
+  }
+}
+
+/* celular deitado: não empilha, senão o hero vira 2 telas de altura */
+@media (max-width: 959px) and (orientation: landscape) and (max-height: 520px) {
+  .hero-layout {
+    grid-template-areas: "copy art";
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: 1.5rem;
+    padding: 68px clamp(1.25rem, 4vw, 3rem) 76px;
+  }
+
+  .hero-copy {
+    text-align: left;
+  }
+
+  .hero-meta,
+  .hero-availability,
+  .hero-tech-list,
+  .hero-actions {
+    justify-content: flex-start;
+  }
+
+  .hero-role,
+  .hero-description {
+    margin-inline: 0;
+  }
+
+  .hero-art-frame {
+    width: 100%;
+    height: min(62svh, 300px);
+  }
+
+  .hero-title {
+    font-size: clamp(1.9rem, 5.2vw, 3rem);
+  }
+
+  .hero-description,
+  .hero-tech-list,
+  .hero-clock,
+  .hero-scroll {
+    display: none;
+  }
+
+  .hero-meta {
+    margin-bottom: 0.75rem;
+  }
+
+  .hero-marquee {
+    height: 3.5rem;
+    padding-top: 0.5rem;
   }
 }
 
@@ -1148,7 +1261,7 @@ body.page-ready .hero-title-accent::after {
   .hero-tech,
   .hero-art-frame,
   .hero-marquee,
-  .hero-title-accent::after {
+  .hero-underline::after {
     animation: none;
     opacity: 1;
     transform: none;
@@ -1199,7 +1312,7 @@ body.page-ready .hero-title-accent::after {
   .hero-pebble,
   .hero-art-orbit,
   .hero-marquee,
-  .hero-title-accent::after {
+  .hero-underline::after {
     animation: none;
     opacity: 1;
     transform: none;
@@ -1519,7 +1632,7 @@ body.page-ready .site-header {
   align-items: baseline;
   gap: 1rem;
   padding-block: 0.3rem;
-  font-size: clamp(2.6rem, 13vw, 4.5rem);
+  font-size: clamp(2.2rem, min(13vw, 11svh), 4.5rem);
   font-weight: 700;
   letter-spacing: -0.06em;
   line-height: 1.05;

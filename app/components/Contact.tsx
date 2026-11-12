@@ -208,7 +208,7 @@ export default function Contact() {
           </div>
           <h2
             id="contato-title"
-            className="max-w-3xl font-black leading-[1.05] tracking-tight text-balance"
+            className="title-3d max-w-3xl font-black leading-[1.05] tracking-tight text-balance"
             style={{ fontSize: "clamp(2rem, 4.6vw, 3.5rem)" }}
           >
             {t.contact.title}

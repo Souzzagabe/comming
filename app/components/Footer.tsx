@@ -44,8 +44,8 @@ export default function Footer() {
       />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-8 lg:px-12">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:gap-12">
-          <div className="sm:col-span-2 lg:col-span-1">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:gap-12">
+          <div className="col-span-2 sm:col-span-4 lg:col-span-1">
             <a
               href="#home"
               aria-label={isPt ? "GS. — Início" : "GS. — Home"}
@@ -87,7 +87,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="col-span-2 sm:col-span-2 lg:col-span-1">
             <h2 className={TITLE}>{t.nav.contact}</h2>
             <ul className="space-y-3">
               <li>
@@ -139,7 +139,7 @@ export default function Footer() {
       {/* wordmark gigante, cortado na base (decorativo) */}
       <div
         aria-hidden="true"
-        className="footer-wordmark pointer-events-none -mb-[0.16em] select-none bg-gradient-to-b from-[var(--color-primary)]/35 to-transparent bg-clip-text text-center text-[clamp(4.5rem,19vw,17rem)] font-black leading-[0.85] tracking-[-0.06em] text-transparent"
+        className="footer-wordmark pointer-events-none -mb-[0.16em] select-none bg-gradient-to-b from-[var(--color-primary)]/35 to-transparent bg-clip-text text-center text-[clamp(3rem,18vw,24rem)] font-black leading-[0.85] tracking-[-0.06em] text-transparent"
       >
         souzzagabe
       </div>

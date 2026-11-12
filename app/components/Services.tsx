@@ -78,7 +78,7 @@ export default function Services() {
           {/* text-shadow:none → o `main h2` global engrossava o texto preto sobre o amarelo */}
           <h2
             id="servicos-title"
-            className="max-w-3xl font-black leading-[1.05] tracking-tight text-balance text-black [text-shadow:none]"
+            className="title-3d-ink max-w-3xl font-black leading-[1.05] tracking-tight text-balance"
             style={{ fontSize: "clamp(2rem, 4.6vw, 3.5rem)" }}
           >
             {t.services.title}
@@ -96,20 +96,20 @@ export default function Services() {
               >
                 <article
                   onPointerMove={trackPointer}
-                  className="services-card flex h-full flex-col gap-4 p-5 sm:p-6"
+                  className="services-card relative flex h-full flex-col items-start gap-4 p-4 min-[380px]:flex-row sm:flex-col sm:p-6"
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="flex w-full shrink-0 items-start justify-between min-[380px]:w-auto sm:w-full">
                     <div className="inline-flex size-11 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] text-[var(--color-primary)]">
                       <Icon size={22} aria-hidden="true" />
                     </div>
                     <span
-                      className="font-mono text-xs tracking-[0.2em] text-[var(--color-muted)]/60"
+                      className="static font-mono text-xs tracking-[0.2em] text-[var(--color-muted)]/60 min-[380px]:absolute min-[380px]:right-4 min-[380px]:top-4 sm:static"
                       aria-hidden="true"
                     >
                       {String(i + 1).padStart(2, "0")}
                     </span>
                   </div>
-                  <div>
+                  <div className="min-w-0 flex-1 min-[380px]:pr-6 sm:pr-0">
                     <h3 className="font-bold text-[var(--color-foreground)]">{service.title}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">
                       {service.desc}

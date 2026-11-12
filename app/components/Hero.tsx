@@ -45,19 +45,37 @@ const PEBBLES = [
 const vars = (v: Record<string, string | number>) => v as CSSProperties;
 
 /** Quebra o texto em palavras; cada uma sobe de dentro de uma máscara. */
-function TitleWords({ text, offset = 0 }: { text: string; offset?: number }) {
+function TitleWords({
+  text,
+  offset = 0,
+  underlineLast = false,
+}: {
+  text: string;
+  offset?: number;
+  underlineLast?: boolean;
+}) {
+  const words = text.split(" ");
   return (
     <>
-      {text.split(" ").map((word, i) => (
-        <Fragment key={`${word}-${i}`}>
-          {i > 0 && " "}
+      {words.map((word, i) => {
+        const mask = (
           <span className="hero-word-mask">
             <span className="hero-word" style={vars({ "--w": offset + i })}>
               {word}
             </span>
           </span>
-        </Fragment>
-      ))}
+        );
+        return (
+          <Fragment key={`${word}-${i}`}>
+            {i > 0 && " "}
+            {underlineLast && i === words.length - 1 ? (
+              <span className="hero-underline">{mask}</span>
+            ) : (
+              mask
+            )}
+          </Fragment>
+        );
+      })}
     </>
   );
 }
@@ -275,7 +293,7 @@ export default function Hero() {
               <TitleWords text={t.hero.title1} />
             </span>
             <span className="hero-title-accent">
-              <TitleWords text={t.hero.title2} offset={title1Words} />
+              <TitleWords text={t.hero.title2} offset={title1Words} underlineLast />
             </span>
           </h1>
 

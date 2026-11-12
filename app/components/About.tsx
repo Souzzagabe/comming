@@ -14,7 +14,7 @@ import {
 import { useI18n } from "@/app/contexts/i18n-context";
 
 /** Atualize este número depois das otimizações: a cor do anel muda sozinha. */
-const LIGHTHOUSE_MOBILE = 43;
+const LIGHTHOUSE_MOBILE = 99;
 
 type Trait = {
   icon: LucideIcon;
@@ -161,10 +161,10 @@ export default function About() {
 
               <h2
                 id="sobre-title"
-                className="font-black leading-[1.05] tracking-tight text-balance"
+                className="title-3d font-black leading-[1.05] tracking-tight text-balance"
               >
                 <span
-                  className="block text-[var(--color-foreground)]"
+                  className="block"
                   style={{ fontSize: "clamp(2rem, 4.6vw, 3.5rem)" }}
                 >
                   {t.about.title1}
@@ -172,7 +172,7 @@ export default function About() {
                 {/* text-shadow:none → o `main h2` global desenhava a sombra atrás do
                     texto transparente e deixava o gradiente "sujo" */}
                 <span
-                  className="block bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] bg-clip-text pb-[0.1em] text-transparent [text-shadow:none]"
+                  className="title-3d-accent block pb-[0.1em]"
                   style={{ fontSize: "clamp(2rem, 4.6vw, 3.5rem)" }}
                 >
                   {t.about.title2}
@@ -191,18 +191,18 @@ export default function About() {
           </div>
 
           {/* RIGHT - bento */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             {traits.map((trait, i) => {
               const Icon = trait.icon;
               return (
                 <div
                   key={trait.title}
-                  className={`about-reveal ${trait.wide ? "sm:col-span-2" : ""}`}
+                  className={`about-reveal ${trait.wide ? "col-span-2" : ""}`}
                   style={vars({ "--i": i + 1 })}
                 >
                   <article
                     onPointerMove={trackPointer}
-                    className="about-card flex h-full items-start justify-between gap-5 p-5 sm:p-6"
+                    className="about-card flex h-full items-start justify-between gap-4 p-4 sm:gap-5 sm:p-6"
                   >
                     <div className="flex flex-col gap-3">
                       <div className="inline-flex size-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">

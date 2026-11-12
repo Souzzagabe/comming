@@ -65,7 +65,7 @@ export default function Projects() {
           </div>
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <h2
-              className="font-black leading-tight tracking-tight text-[var(--color-foreground)]"
+              className="title-3d font-black leading-tight tracking-tight"
               style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
             >
               {t.projects.title}
