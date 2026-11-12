@@ -1,24 +1,36 @@
 ﻿"use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
-import { Globe, Layout, Server, Link2, Sparkles, BookOpen } from "lucide-react";
+import { useEffect, useRef, type CSSProperties, type PointerEvent } from "react";
+import { ArrowRight, BookOpen, Globe, Layout, Link2, Server, Sparkles } from "lucide-react";
 import { useI18n } from "@/app/contexts/i18n-context";
 
 const ICONS = [Globe, Layout, Server, Link2, Sparkles, BookOpen] as const;
-const ACCENTS = [
-  "var(--color-primary)",
-  "var(--color-secondary)",
-  "var(--color-accent)",
-  "var(--color-purple)",
-  "var(--color-primary)",
-  "var(--color-secondary)",
-] as const;
+
+const vars = (v: Record<string, string | number>) => v as CSSProperties;
+
+/** Luz do hover que segue o cursor dentro do card (só mouse). */
+function trackPointer(event: PointerEvent<HTMLElement>) {
+  if (event.pointerType !== "mouse") return;
+  const el = event.currentTarget;
+  const rect = el.getBoundingClientRect();
+  el.style.setProperty("--mx", `${event.clientX - rect.left}px`);
+  el.style.setProperty("--my", `${event.clientY - rect.top}px`);
+}
 
 export default function Services() {
   const { t } = useI18n();
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Pausa a flutuação infinita dos pebbles quando a seção está fora da tela.
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      section.dataset.inview = String(entry.isIntersecting);
+    });
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
 
   const services = [
     { title: t.services.s1_title, desc: t.services.s1_desc },
@@ -32,98 +44,98 @@ export default function Services() {
   return (
     <section
       id="servicos"
-      className="services-section relative isolate scroll-reveal overflow-hidden bg-[var(--color-primary)] py-24 text-black md:py-32"
+      ref={sectionRef}
+      aria-labelledby="servicos-title"
+      className="services-section relative isolate scroll-reveal overflow-hidden bg-[var(--color-primary)] py-16 text-black sm:py-20 md:py-32"
     >
+      {["one", "two", "three", "four"].map((name) => (
+        <div
+          key={name}
+          className={`services-pebble services-pebble-${name} pointer-events-none absolute`}
+          aria-hidden="true"
+        >
+          <span />
+        </div>
+      ))}
+
       <div
-        className="services-pebble services-pebble-one pointer-events-none absolute"
+        className="absolute inset-x-0 top-0 h-px"
         aria-hidden="true"
-      >
-        <span />
-      </div>
-      <div
-        className="services-pebble services-pebble-two pointer-events-none absolute"
-        aria-hidden="true"
-      >
-        <span />
-      </div>
-      <div
-        className="services-pebble services-pebble-three pointer-events-none absolute"
-        aria-hidden="true"
-      >
-        <span />
-      </div>
-      <div
-        className="services-pebble services-pebble-four pointer-events-none absolute"
-        aria-hidden="true"
-      >
-        <span />
-      </div>
-      <div
-        className="absolute top-0 inset-x-0 h-px"
         style={{
           background:
             "linear-gradient(to right, transparent, rgb(0 0 0 / 19%) 30%, rgb(0 0 0 / 19%) 70%, transparent)",
         }}
       />
 
-      <div ref={ref} className="relative z-10 mx-auto max-w-7xl px-4 sm:px-8 md:px-14">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
-          className="mb-14"
-        >
-          <div className="flex items-center gap-3 mb-5">
-            <div className="h-px w-8 bg-black" />
-            <span className="text-[11px] font-mono tracking-[0.3em] text-black uppercase">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-8 md:px-14">
+        <div className="services-reveal mb-10 sm:mb-14" style={vars({ "--i": 0 })}>
+          <div className="mb-5 flex items-center gap-3">
+            <div className="h-px w-8 bg-black" aria-hidden="true" />
+            <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-black">
               {t.services.label}
             </span>
           </div>
+          {/* text-shadow:none → o `main h2` global engrossava o texto preto sobre o amarelo */}
           <h2
-            className="font-black leading-tight tracking-tight text-black"
-            style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
+            id="servicos-title"
+            className="max-w-3xl font-black leading-[1.05] tracking-tight text-balance text-black [text-shadow:none]"
+            style={{ fontSize: "clamp(2rem, 4.6vw, 3.5rem)" }}
           >
             {t.services.title}
           </h2>
-        </motion.div>
+        </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((service, i) => {
             const Icon = ICONS[i];
-            const color = ACCENTS[i];
             return (
-              <motion.div
+              <li
                 key={service.title}
-                initial={{ opacity: 0, y: 30 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.55, delay: 0.08 * i }}
-                className="portfolio-card group relative overflow-hidden rounded-3xl border border-black/15 bg-[var(--color-surface)] p-6 text-[var(--color-foreground)] transition-all duration-300"
+                className="services-reveal"
+                style={vars({ "--i": i + 1 })}
               >
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl"
-                  style={{
-                    background: `radial-gradient(ellipse at 20% 20%, ${color}0D 0%, transparent 60%)`,
-                  }}
-                />
-                <div
-                  className="absolute bottom-0 left-4 right-4 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{
-                    background: `linear-gradient(to right, transparent, ${color}50, transparent)`,
-                  }}
-                />
-                <div
-                  className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl"
-                  style={{ background: `${color}15`, color }}
+                <article
+                  onPointerMove={trackPointer}
+                  className="services-card flex h-full flex-col gap-4 p-5 sm:p-6"
                 >
-                  <Icon size={22} />
-                </div>
-                <h3 className="font-bold text-[var(--color-foreground)]">{service.title}</h3>
-                <p className="mt-2 text-sm text-[var(--color-muted)] leading-relaxed">
-                  {service.desc}
-                </p>
-              </motion.div>
+                  <div className="flex items-start justify-between">
+                    <div className="inline-flex size-11 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] text-[var(--color-primary)]">
+                      <Icon size={22} aria-hidden="true" />
+                    </div>
+                    <span
+                      className="font-mono text-xs tracking-[0.2em] text-[var(--color-muted)]/60"
+                      aria-hidden="true"
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-[var(--color-foreground)]">{service.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">
+                      {service.desc}
+                    </p>
+                  </div>
+                </article>
+              </li>
             );
           })}
+        </ul>
+
+        <div
+          className="services-reveal mt-10 flex justify-center sm:mt-14"
+          style={vars({ "--i": 7 })}
+        >
+          <a
+            href="#contato"
+            className="services-cta group inline-flex min-h-12 items-center gap-2 rounded-full bg-black px-7 py-3 text-sm font-bold text-[var(--color-primary)]"
+          >
+            {t.hero.cta_contact}
+            <ArrowRight
+              size={16}
+              aria-hidden="true"
+              className="transition-transform duration-300 group-hover:translate-x-1"
+            />
+          </a>
         </div>
       </div>
     </section>

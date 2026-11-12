@@ -1,19 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { ArrowUpRight } from "lucide-react";
 import { useI18n } from "@/app/contexts/i18n-context";
 
-function scrollTo(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-}
+const SECTION_IDS = ["home", "sobre", "servicos", "contato"] as const;
+const FOCUSABLE = "a[href], button:not([disabled])";
+
+const vars = (v: Record<string, string | number>) => v as CSSProperties;
 
 export default function Header() {
   const { t, locale, setLocale } = useI18n();
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [active, setActive] = useState("#home");
+
+  const headerRef = useRef<HTMLElement>(null);
+  const menuRef = useRef<HTMLElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const linkRefs = useRef<Array<HTMLAnchorElement | null>>([]);
+  const activeIndexRef = useRef(0);
+
+  const isPt = locale === "pt";
+  const labels = {
+    nav: isPt ? "Navegação principal" : "Main navigation",
+    menu: "Menu",
+    open: isPt ? "Abrir menu" : "Open menu",
+    close: isPt ? "Fechar menu" : "Close menu",
+    language: isPt ? "Idioma" : "Language",
+  };
 
   const navLinks = [
     { href: "#home", label: t.nav.home },
@@ -22,159 +39,276 @@ export default function Header() {
     { href: "#contato", label: t.nav.contact },
   ];
 
-  const localeColor = (selected: boolean) =>
-    selected
-      ? scrolled
-        ? "var(--color-primary)"
-        : "#000000"
-      : scrolled
-        ? "var(--color-muted)"
-        : "rgb(0 0 0 / 55%)";
+  const activeIndex = Math.max(
+    0,
+    navLinks.findIndex((link) => link.href === active),
+  );
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-
-    const observers = ["home", "sobre", "servicos", "contato"].flatMap((id) => {
-      const section = document.getElementById(id);
-      if (!section) return [];
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) setActive(`#${id}`);
-        },
-        { rootMargin: "-40% 0px -55% 0px" },
-      );
-      observer.observe(section);
-      return [observer];
+  /** Move o "pill" deslizante para o link informado (sem re-render). */
+  const moveIndicator = useCallback((index: number) => {
+    const list = listRef.current;
+    const link = linkRefs.current[index];
+    if (!list || !link) return;
+    list.style.setProperty("--ix", `${link.offsetLeft}px`);
+    list.style.setProperty("--iw", `${link.offsetWidth}px`);
+    linkRefs.current.forEach((el, i) => {
+      if (el) el.dataset.current = String(i === index);
     });
+  }, []);
+
+  // Scroll: fundo ao rolar, esconde ao descer / mostra ao subir, e último item no fim da página.
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      const y = window.scrollY;
+      setScrolled(y > 24);
+
+      const delta = y - lastY;
+      if (Math.abs(delta) > 6) {
+        setHidden(delta > 0 && y > 240);
+        lastY = y;
+      }
+      if (y <= 0) setHidden(false);
+
+      if (window.innerHeight + y >= document.documentElement.scrollHeight - 4) {
+        setActive("#contato");
+      }
+    };
+
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    update();
 
     return () => {
       window.removeEventListener("scroll", onScroll);
-      observers.forEach((observer) => observer.disconnect());
+      if (frame) cancelAnimationFrame(frame);
     };
   }, []);
 
-  return (
-    <motion.header
-      initial={{ y: -24, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.45, ease: "easeOut" }}
-      className={`fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300 ${
-        scrolled
-          ? "border-[var(--color-border)] bg-black/85 backdrop-blur-xl"
-          : "border-transparent bg-transparent"
-      }`}
-    >
-      <nav
-        aria-label={locale === "pt" ? "Navegação principal" : "Main navigation"}
-        className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-12"
-      >
-        <button
-          onClick={() => scrollTo("home")}
-          className={`rounded-lg text-2xl font-bold tracking-[-0.09em] transition-colors ${
-            scrolled ? "text-[var(--color-foreground)]" : "text-black"
-          }`}
-          aria-label="GS. — Home"
-        >
-          GS
-          <span className={scrolled ? "text-[var(--color-primary)]" : "text-black"}>.</span>
-        </button>
+  // Seção ativa: um único observer para todas as seções.
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActive(`#${entry.target.id}`);
+        });
+      },
+      { rootMargin: "-40% 0px -55% 0px" },
+    );
+    SECTION_IDS.forEach((id) => {
+      const section = document.getElementById(id);
+      if (section) observer.observe(section);
+    });
+    return () => observer.disconnect();
+  }, []);
 
-        <ul className="hidden items-center gap-1 md:flex">
-          {navLinks.map((link) => (
-            <li key={link.href}>
-              <button
-                onClick={() => scrollTo(link.href.slice(1))}
+  // Indicador deslizante: acompanha o link ativo e re-mede se a largura mudar (idioma, fonte).
+  useEffect(() => {
+    activeIndexRef.current = activeIndex;
+    moveIndicator(activeIndex);
+  }, [activeIndex, moveIndicator]);
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+
+    const measure = () => moveIndicator(activeIndexRef.current);
+    const observer = new ResizeObserver(measure);
+    observer.observe(list);
+    document.fonts?.ready.then(measure);
+
+    // primeira posição sem animar a partir de 0
+    const frame = requestAnimationFrame(() => {
+      measure();
+      list.dataset.ready = "true";
+    });
+
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [moveIndicator]);
+
+  // Menu mobile: trava scroll, foco, Esc, Tab preso e fecha ao ir para desktop.
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const root = document.documentElement;
+    const previousOverflow = root.style.overflow;
+    root.style.overflow = "hidden";
+    menuRef.current?.querySelector<HTMLElement>("a")?.focus({ preventScroll: true });
+
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        toggleRef.current?.focus();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const nodes = [headerRef.current, menuRef.current]
+        .flatMap((container) =>
+          container ? Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE)) : [],
+        )
+        .filter((el) => el.getClientRects().length > 0);
+      if (!nodes.length) return;
+
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      const current = document.activeElement as HTMLElement | null;
+
+      if (event.shiftKey && (current === first || !nodes.includes(current as HTMLElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (current === last || !nodes.includes(current as HTMLElement))) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    const desktop = window.matchMedia("(min-width: 768px)");
+    const onDesktop = () => {
+      if (desktop.matches) setMobileOpen(false);
+    };
+
+    document.addEventListener("keydown", onKey);
+    desktop.addEventListener("change", onDesktop);
+
+    return () => {
+      root.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKey);
+      desktop.removeEventListener("change", onDesktop);
+    };
+  }, [mobileOpen]);
+
+  // Com o menu aberto o fundo é amarelo → o header usa o tema claro.
+  const theme = scrolled && !mobileOpen ? "dark" : "light";
+
+  return (
+    <>
+      <header
+        ref={headerRef}
+        className="site-header"
+        data-theme={theme}
+        data-compact={scrolled ? "true" : "false"}
+        data-hidden={hidden && !mobileOpen ? "true" : "false"}
+      >
+        <nav
+          aria-label={labels.nav}
+          className="site-header-bar mx-auto flex max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-12"
+        >
+          <a href="#home" className="site-logo" aria-label="GS. — Home">
+            GS<span>.</span>
+          </a>
+
+          <ul
+            ref={listRef}
+            className="site-nav hidden items-center gap-1 md:flex"
+            onPointerLeave={() => moveIndicator(activeIndexRef.current)}
+            onBlur={() => moveIndicator(activeIndexRef.current)}
+          >
+            <li className="site-nav-indicator" aria-hidden="true" />
+            {navLinks.map((link, i) => (
+              <li key={link.href}>
+                <a
+                  ref={(el) => {
+                    linkRefs.current[i] = el;
+                  }}
+                  href={link.href}
+                  aria-current={active === link.href ? "location" : undefined}
+                  className="site-nav-link"
+                  onPointerEnter={(event) => {
+                    if (event.pointerType === "mouse") moveIndicator(i);
+                  }}
+                  onFocus={() => moveIndicator(i)}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div role="group" aria-label={labels.language} className="site-lang">
+              {(["pt", "en"] as const).map((code) => (
+                <button
+                  key={code}
+                  type="button"
+                  lang={code}
+                  aria-pressed={locale === code}
+                  onClick={() => setLocale(code)}
+                >
+                  {code.toUpperCase()}
+                </button>
+              ))}
+            </div>
+
+            <a href="#contato" className="site-cta hidden items-center gap-1.5 md:inline-flex">
+              {t.nav.hire}
+              <ArrowUpRight size={16} aria-hidden="true" />
+            </a>
+
+            <button
+              ref={toggleRef}
+              type="button"
+              onClick={() => setMobileOpen((open) => !open)}
+              className="site-toggle md:hidden"
+              aria-label={mobileOpen ? labels.close : labels.open}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-navigation"
+            >
+              <span className="site-burger" aria-hidden="true">
+                <span />
+                <span />
+              </span>
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      {/* Fora do <header>: o backdrop-filter dele criaria um containing block e
+          quebraria o `position: fixed` do overlay. */}
+      <nav
+        id="mobile-navigation"
+        ref={menuRef}
+        aria-label={labels.menu}
+        data-open={mobileOpen ? "true" : "false"}
+        className="site-menu md:hidden"
+      >
+        <ul className="site-menu-list">
+          {navLinks.map((link, i) => (
+            <li key={link.href} style={vars({ "--i": i })}>
+              <a
+                href={link.href}
                 aria-current={active === link.href ? "location" : undefined}
-                className={`rounded-full px-4 py-2 text-sm transition-colors ${
-                  scrolled
-                    ? active === link.href
-                      ? "bg-[var(--color-surface)] text-[var(--color-foreground)]"
-                      : "text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
-                    : active === link.href
-                      ? "bg-black/10 text-black"
-                      : "text-black/70 hover:text-black"
-                }`}
+                onClick={() => setMobileOpen(false)}
+                className="site-menu-link"
               >
+                <span className="site-menu-index" aria-hidden="true">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
                 {link.label}
-              </button>
+              </a>
             </li>
           ))}
         </ul>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          <button
-            onClick={() => setLocale(locale === "pt" ? "en" : "pt")}
-            className={`inline-flex min-h-11 items-center gap-1 rounded-full border px-3 text-xs font-bold transition-colors ${
-              scrolled
-                ? "border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
-                : "border-black/30 text-black/75 hover:border-black hover:text-black"
-            }`}
-            aria-label={
-              locale === "pt" ? "Change language to English" : "Mudar idioma para português"
-            }
-          >
-            <span style={{ color: localeColor(locale === "pt") }}>PT</span>
-            <span aria-hidden="true">/</span>
-            <span style={{ color: localeColor(locale === "en") }}>EN</span>
-          </button>
-
-          <button
-            onClick={() => scrollTo("contato")}
-            className={`hidden min-h-11 items-center gap-2 rounded-full px-5 text-sm font-bold transition-all hover:-translate-y-0.5 md:flex ${
-              scrolled
-                ? "bg-[var(--color-primary)] text-black"
-                : "bg-black text-[var(--color-primary)]"
-            }`}
-          >
+        <div className="site-menu-foot" style={vars({ "--i": navLinks.length })}>
+          <a href="#contato" onClick={() => setMobileOpen(false)} className="site-menu-cta">
             {t.nav.hire}
-          </button>
-
-          <button
-            onClick={() => setMobileOpen((open) => !open)}
-            className={`inline-flex size-11 items-center justify-center rounded-full border md:hidden ${
-              scrolled
-                ? "border-[var(--color-border)] text-[var(--color-foreground)]"
-                : "border-black/30 text-black"
-            }`}
-            aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
-            aria-expanded={mobileOpen}
-            aria-controls="mobile-navigation"
-          >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+            <ArrowUpRight size={18} aria-hidden="true" />
+          </a>
+          <a href="mailto:gabweb95@gmail.com" className="site-menu-mail">
+            gabweb95@gmail.com
+          </a>
         </div>
       </nav>
-
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            id="mobile-navigation"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18 }}
-            className="border-t border-[var(--color-border)] bg-black/95 px-5 pb-5 pt-3 backdrop-blur-xl md:hidden"
-          >
-            <ul className="mx-auto flex max-w-7xl flex-col gap-1">
-              {navLinks.map((link) => (
-                <li key={link.href}>
-                  <button
-                    onClick={() => {
-                      scrollTo(link.href.slice(1));
-                      setMobileOpen(false);
-                    }}
-                    className="min-h-12 w-full rounded-xl px-4 text-left text-base text-[var(--color-foreground)] transition-colors hover:bg-[var(--color-surface)] hover:text-[var(--color-primary)]"
-                  >
-                    {link.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.header>
+    </>
   );
 }

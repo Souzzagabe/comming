@@ -38,11 +38,19 @@ export default function Projects() {
   ];
 
   return (
-    <section id="projetos" className="relative py-24 md:py-32 bg-[var(--color-background)]">
-      <div className="absolute top-0 inset-x-0 h-px"
-        style={{ background: "linear-gradient(to right, transparent, var(--color-border) 30%, var(--color-border) 70%, transparent)" }} />
+    <section
+      id="projetos"
+      className="relative bg-[var(--color-background)] py-16 sm:py-20 md:py-32"
+    >
+      <div
+        className="absolute top-0 inset-x-0 h-px"
+        style={{
+          background:
+            "linear-gradient(to right, transparent, var(--color-border) 30%, var(--color-border) 70%, transparent)",
+        }}
+      />
 
-      <div ref={ref} className="mx-auto max-w-7xl px-8 md:px-14">
+      <div ref={ref} className="mx-auto max-w-7xl px-4 sm:px-8 md:px-14">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -51,13 +59,20 @@ export default function Projects() {
         >
           <div className="flex items-center gap-3 mb-5">
             <div className="h-px w-8 bg-[var(--color-primary)]" />
-            <span className="text-[11px] font-mono tracking-[0.3em] text-[var(--color-primary)] uppercase">{t.projects.label}</span>
+            <span className="text-[11px] font-mono tracking-[0.3em] text-[var(--color-primary)] uppercase">
+              {t.projects.label}
+            </span>
           </div>
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-            <h2 className="font-black leading-tight tracking-tight text-[var(--color-foreground)]" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
+            <h2
+              className="font-black leading-tight tracking-tight text-[var(--color-foreground)]"
+              style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
+            >
               {t.projects.title}
             </h2>
-            <p className="text-[var(--color-muted)] max-w-md text-sm md:text-base leading-relaxed">{t.projects.description}</p>
+            <p className="text-[var(--color-muted)] max-w-md text-sm md:text-base leading-relaxed">
+              {t.projects.description}
+            </p>
           </div>
         </motion.div>
 
@@ -72,34 +87,57 @@ export default function Projects() {
             >
               <div
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                style={{ background: `radial-gradient(ellipse at 0% 50%, ${project.accent}0D 0%, transparent 55%)` }}
+                style={{
+                  background: `radial-gradient(ellipse at 0% 50%, ${project.accent}0D 0%, transparent 55%)`,
+                }}
               />
-              <div className="absolute left-0 top-0 bottom-0 w-0.5" style={{ background: project.accent, opacity: 0.6 }} />
+              <div
+                className="absolute left-0 top-0 bottom-0 w-0.5"
+                style={{ background: project.accent, opacity: 0.6 }}
+              />
 
-              <div className="flex flex-col md:flex-row md:items-center gap-6 p-6 md:p-8 pl-8 md:pl-10">
-                <span className="shrink-0 text-4xl md:text-5xl font-black leading-none select-none" style={{ color: project.accent, opacity: 0.25 }}>
+              <div className="flex min-w-0 flex-col gap-5 p-4 pl-6 sm:gap-6 sm:p-6 sm:pl-8 lg:flex-row lg:items-center lg:p-8 lg:pl-10">
+                <span
+                  className="shrink-0 text-4xl md:text-5xl font-black leading-none select-none"
+                  style={{ color: project.accent, opacity: 0.25 }}
+                >
                   {project.num}
                 </span>
 
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg md:text-xl font-bold text-[var(--color-foreground)] mb-2">{project.title}</h3>
-                  <p className="text-sm text-[var(--color-muted)] leading-relaxed line-clamp-2">{project.description}</p>
-                  <p className="mt-3 text-xs font-medium" style={{ color: project.accent }}>↗ {project.result}</p>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-lg md:text-xl font-bold text-[var(--color-foreground)] mb-2">
+                    {project.title}
+                  </h3>
+                  <p className="text-sm text-[var(--color-muted)] leading-relaxed line-clamp-2">
+                    {project.description}
+                  </p>
+                  <p className="mt-3 text-xs font-medium" style={{ color: project.accent }}>
+                    ↗ {project.result}
+                  </p>
                 </div>
 
-                <div className="flex flex-wrap gap-2 md:max-w-[280px]">
+                <div className="flex flex-wrap gap-2 lg:max-w-[280px]">
                   {project.techs.map((tech) => (
-                    <span key={tech} className="px-3 py-1 rounded-full text-xs font-mono text-[var(--color-muted)] border border-[var(--color-border)] bg-[var(--color-background)]">
+                    <span
+                      key={tech}
+                      className="px-3 py-1 rounded-full text-xs font-mono text-[var(--color-muted)] border border-[var(--color-border)] bg-[var(--color-background)]"
+                    >
                       {tech}
                     </span>
                   ))}
                 </div>
 
                 <div className="flex gap-3 shrink-0">
-                  <button aria-label={t.projects.view_code} className="w-10 h-10 flex items-center justify-center rounded-xl border border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-foreground)] hover:border-[var(--color-primary)]/40 transition-all">
+                  <button
+                    aria-label={t.projects.view_code}
+                    className="w-10 h-10 flex items-center justify-center rounded-xl border border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-foreground)] hover:border-[var(--color-primary)]/40 transition-all"
+                  >
                     <Github size={17} />
                   </button>
-                  <button aria-label={t.projects.view_demo} className="w-10 h-10 flex items-center justify-center rounded-xl border border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-foreground)] hover:border-[var(--color-primary)]/40 transition-all">
+                  <button
+                    aria-label={t.projects.view_demo}
+                    className="w-10 h-10 flex items-center justify-center rounded-xl border border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-foreground)] hover:border-[var(--color-primary)]/40 transition-all"
+                  >
                     <ExternalLink size={17} />
                   </button>
                 </div>
@@ -111,4 +149,3 @@ export default function Projects() {
     </section>
   );
 }
-

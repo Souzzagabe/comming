@@ -19,7 +19,6 @@ export default function Home() {
 
       <main id="conteudo" className="relative z-10">
         <Hero />
-        <Marquee />
         <About />
         <Services />
         <Contact />

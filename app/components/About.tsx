@@ -1,151 +1,237 @@
 ﻿"use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
-import { Code2, Lightbulb, Rocket, Layers, TestTube2, Globe } from "lucide-react";
+import type { CSSProperties, PointerEvent } from "react";
+import {
+  ArrowUpRight,
+  Code2,
+  Globe,
+  Layers,
+  Lightbulb,
+  Rocket,
+  TestTube2,
+  type LucideIcon,
+} from "lucide-react";
 import { useI18n } from "@/app/contexts/i18n-context";
 
-const traits = [
+/** Atualize este número depois das otimizações: a cor do anel muda sozinha. */
+const LIGHTHOUSE_MOBILE = 43;
+
+type Trait = {
+  icon: LucideIcon;
+  title: string;
+  desc: string;
+  wide?: boolean;
+  score?: number;
+  cta?: { label: string; href: string };
+};
+
+const traits: Trait[] = [
   {
     icon: Code2,
     title: "Código limpo",
     desc: "Componentização, escalabilidade e boas práticas.",
-    color: "var(--color-primary)",
   },
   {
     icon: Lightbulb,
     title: "Foco em UX",
     desc: "Interfaces intuitivas centradas no usuário.",
-    color: "var(--color-secondary)",
   },
   {
     icon: Rocket,
     title: "Performance",
-    desc: "Lighthouse mobile: 43/100 no baseline medido.",
-    color: "var(--color-accent)",
+    desc: `Lighthouse mobile: ${LIGHTHOUSE_MOBILE}/100 no baseline medido.`,
+    wide: true,
+    score: LIGHTHOUSE_MOBILE,
   },
   {
     icon: Layers,
     title: "Fullstack",
     desc: "Frontend e backend integrados sem fricção.",
-    color: "var(--color-primary)",
   },
   {
     icon: TestTube2,
     title: "Testes",
     desc: "Jest, TDD e fluxo de entrega contínua.",
-    color: "var(--color-secondary)",
   },
   {
     icon: Globe,
     title: "Freelancer",
     desc: "Sites, landing pages e sistemas sob demanda.",
-    color: "var(--color-accent)",
+    wide: true,
+    cta: { label: "Vamos conversar", href: "#contato" },
   },
-] as const;
+];
+
+const vars = (v: Record<string, string | number>) => v as CSSProperties;
+
+/** Luz do hover que segue o cursor dentro do card (só mouse). */
+function trackPointer(event: PointerEvent<HTMLElement>) {
+  if (event.pointerType !== "mouse") return;
+  const el = event.currentTarget;
+  const rect = el.getBoundingClientRect();
+  el.style.setProperty("--mx", `${event.clientX - rect.left}px`);
+  el.style.setProperty("--my", `${event.clientY - rect.top}px`);
+}
+
+/** Anel de score no padrão de cores do Lighthouse (vermelho / laranja / verde). */
+function ScoreRing({ score }: { score: number }) {
+  const radius = 28;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference * (1 - score / 100);
+  const color = score >= 90 ? "#0cce6b" : score >= 50 ? "#ffa400" : "#ff4e42";
+
+  return (
+    <div
+      className="relative size-[76px] shrink-0"
+      role="img"
+      aria-label={`Lighthouse mobile: ${score} de 100`}
+      style={vars({ "--c": circumference.toFixed(2), color })}
+    >
+      <svg viewBox="0 0 72 72" className="size-full -rotate-90" aria-hidden="true">
+        <circle
+          cx="36"
+          cy="36"
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeOpacity="0.16"
+          strokeWidth="5"
+        />
+        <circle
+          className="about-ring-arc"
+          cx="36"
+          cy="36"
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="5"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+        />
+      </svg>
+      <span
+        className="absolute inset-0 grid place-items-center font-mono text-base font-bold text-[var(--color-foreground)]"
+        aria-hidden="true"
+      >
+        {score}
+      </span>
+    </div>
+  );
+}
 
 export default function About() {
   const { t } = useI18n();
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
     <section
       id="sobre"
-      className="relative scroll-reveal bg-[var(--color-background)] py-24 md:py-32"
+      aria-labelledby="sobre-title"
+      className="relative scroll-reveal overflow-hidden bg-[var(--color-background)] py-16 sm:py-20 md:py-32"
     >
       <div
-        className="absolute top-0 inset-x-0 h-px"
+        className="absolute inset-x-0 top-0 h-px"
+        aria-hidden="true"
         style={{
           background:
             "linear-gradient(to right, transparent, var(--color-border) 30%, var(--color-border) 70%, transparent)",
         }}
       />
+      {/* brilho estático de fundo (barato: sem blur, sem animação) */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        aria-hidden="true"
+        style={{
+          background:
+            "radial-gradient(ellipse 50% 45% at 78% 40%, color-mix(in srgb, var(--color-primary) 7%, transparent), transparent 70%)",
+        }}
+      />
 
-      <div ref={ref} className="mx-auto max-w-7xl px-4 sm:px-8 md:px-14">
-        <div className="grid lg:grid-cols-[1fr_1.1fr] gap-14 lg:gap-20 items-start">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-8 md:px-14">
+        <div className="grid items-start gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-20">
           {/* LEFT */}
           <div>
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.7 }}
-            >
-              <div className="flex items-center gap-3 mb-5">
-                <div className="h-px w-8 bg-[var(--color-primary)]" />
-                <span className="text-[11px] font-mono tracking-[0.3em] text-[var(--color-primary)] uppercase">
+            <div className="about-reveal" style={vars({ "--i": 0 })}>
+              <div className="mb-5 flex items-center gap-3">
+                <div className="h-px w-8 bg-[var(--color-primary)]" aria-hidden="true" />
+                <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--color-primary)]">
                   {t.about.label}
                 </span>
               </div>
-              <h2 className="font-black leading-tight tracking-tight">
+
+              <h2
+                id="sobre-title"
+                className="font-black leading-[1.05] tracking-tight text-balance"
+              >
                 <span
                   className="block text-[var(--color-foreground)]"
-                  style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
+                  style={{ fontSize: "clamp(2rem, 4.6vw, 3.5rem)" }}
                 >
                   {t.about.title1}
                 </span>
+                {/* text-shadow:none → o `main h2` global desenhava a sombra atrás do
+                    texto transparente e deixava o gradiente "sujo" */}
                 <span
-                  className="block bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] bg-clip-text text-transparent"
-                  style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
+                  className="block bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] bg-clip-text pb-[0.1em] text-transparent [text-shadow:none]"
+                  style={{ fontSize: "clamp(2rem, 4.6vw, 3.5rem)" }}
                 >
                   {t.about.title2}
                 </span>
               </h2>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="mt-8 space-y-4 text-[var(--color-muted)] leading-relaxed text-sm md:text-base"
+            <div
+              className="about-reveal mt-8 space-y-4 text-sm leading-relaxed text-[var(--color-muted)] md:text-base"
+              style={vars({ "--i": 1 })}
             >
               <p>{t.about.p1}</p>
               <p>{t.about.p2}</p>
               <p>{t.about.p4}</p>
-            </motion.div>
+            </div>
           </div>
 
-          {/* RIGHT - trait cards */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.15 }}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-          >
+          {/* RIGHT - bento */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {traits.map((trait, i) => {
               const Icon = trait.icon;
               return (
-                <motion.div
+                <div
                   key={trait.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={inView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
-                  className="portfolio-card group relative flex flex-col gap-3 overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 transition-all duration-300"
+                  className={`about-reveal ${trait.wide ? "sm:col-span-2" : ""}`}
+                  style={vars({ "--i": i + 1 })}
                 >
-                  <div
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl"
-                    style={{
-                      background: `radial-gradient(ellipse at 20% 20%, ${trait.color}18 0%, transparent 65%)`,
-                    }}
-                  />
-                  <div
-                    className="inline-flex w-10 h-10 items-center justify-center rounded-xl"
-                    style={{ background: `${trait.color}18`, color: trait.color }}
+                  <article
+                    onPointerMove={trackPointer}
+                    className="about-card flex h-full items-start justify-between gap-5 p-5 sm:p-6"
                   >
-                    <Icon size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-sm text-[var(--color-foreground)]">
-                      {trait.title}
-                    </h3>
-                    <p className="mt-1 text-xs text-[var(--color-muted)] leading-relaxed">
-                      {trait.desc}
-                    </p>
-                  </div>
-                </motion.div>
+                    <div className="flex flex-col gap-3">
+                      <div className="inline-flex size-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
+                        <Icon size={20} aria-hidden="true" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-[var(--color-foreground)]">
+                          {trait.title}
+                        </h3>
+                        <p className="mt-1 text-xs leading-relaxed text-[var(--color-muted)]">
+                          {trait.desc}
+                        </p>
+                      </div>
+                      {trait.cta && (
+                        <a
+                          href={trait.cta.href}
+                          className="about-cta mt-1 inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-[var(--color-primary)]"
+                        >
+                          {trait.cta.label}
+                          <ArrowUpRight size={14} aria-hidden="true" />
+                        </a>
+                      )}
+                    </div>
+                    {trait.score !== undefined && <ScoreRing score={trait.score} />}
+                  </article>
+                </div>
               );
             })}
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

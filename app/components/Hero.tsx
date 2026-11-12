@@ -1,135 +1,231 @@
 "use client";
 
-import { useEffect, useRef, type MouseEvent } from "react";
+import { Fragment, useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import Image from "next/image";
-import { ArrowDown, ArrowRight } from "lucide-react";
+import { ArrowDown, ArrowRight, MapPin } from "lucide-react";
 import { useI18n } from "@/app/contexts/i18n-context";
 
 const TECHS = ["Next.js", "React", "TypeScript", "Node.js", "Angular", "PHP"];
 
-function scrollTo(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+const MARQUEE = [
+  "Frontend",
+  "Performance",
+  "UX",
+  "Next.js",
+  "React",
+  "TypeScript",
+  "Angular",
+  "Node.js",
+  "PHP",
+  "Tailwind CSS",
+  "Styled Components",
+  "Material UI",
+  "Jest",
+  "PostgreSQL",
+  "Docker",
+  "Vercel",
+  "GSAP",
+  "Framer Motion",
+];
+
+// 2 repetições por grupo → cobre telas largas; 2 grupos = loop sem emenda
+const MARQUEE_ROW = [...MARQUEE, ...MARQUEE];
+
+const PEBBLES = [
+  "hero-pebble-one",
+  "hero-pebble-two",
+  "hero-pebble-three",
+  "hero-pebble-four",
+  "hero-pebble-five",
+  "hero-pebble-six",
+  "hero-pebble-seven",
+];
+
+/** Helper para tipar custom properties CSS inline (--w, --i, --t...). */
+const vars = (v: Record<string, string | number>) => v as CSSProperties;
+
+/** Quebra o texto em palavras; cada uma sobe de dentro de uma máscara. */
+function TitleWords({ text, offset = 0 }: { text: string; offset?: number }) {
+  return (
+    <>
+      {text.split(" ").map((word, i) => (
+        <Fragment key={`${word}-${i}`}>
+          {i > 0 && " "}
+          <span className="hero-word-mask">
+            <span className="hero-word" style={vars({ "--w": offset + i })}>
+              {word}
+            </span>
+          </span>
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
+/** Hora local de Porto Alegre, atualizada a cada minuto (alinhada ao relógio). */
+function PortoAlegreClock() {
+  const [time, setTime] = useState<string | null>(null);
+
+  useEffect(() => {
+    const format = new Intl.DateTimeFormat("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "America/Sao_Paulo",
+    });
+    let timer: ReturnType<typeof setTimeout>;
+
+    const update = () => {
+      const now = new Date();
+      setTime(format.format(now));
+      timer = setTimeout(update, 60_000 - (now.getSeconds() * 1000 + now.getMilliseconds()) + 50);
+    };
+
+    update();
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="hero-clock hero-enter inline-flex items-center gap-2 rounded-full px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] sm:text-xs">
+      <MapPin size={12} aria-hidden="true" />
+      <span>
+        Porto Alegre · {time ?? "--:--"} BRT
+      </span>
+    </div>
+  );
+}
+
+/** Efeito "magnético" leve nos botões (só mouse; CSS faz a suavização). */
+function pullButton(event: PointerEvent<HTMLElement>) {
+  if (event.pointerType !== "mouse") return;
+  const el = event.currentTarget;
+  const r = el.getBoundingClientRect();
+  const x = (event.clientX - (r.left + r.width / 2)) / r.width;
+  const y = (event.clientY - (r.top + r.height / 2)) / r.height;
+  el.style.setProperty("--mx", `${(x * 12).toFixed(2)}px`);
+  el.style.setProperty("--my", `${(y * 9).toFixed(2)}px`);
+}
+
+function releaseButton(event: PointerEvent<HTMLElement>) {
+  event.currentTarget.style.setProperty("--mx", "0px");
+  event.currentTarget.style.setProperty("--my", "0px");
 }
 
 export default function Hero() {
   const { t } = useI18n();
   const sectionRef = useRef<HTMLElement>(null);
-  const artRef = useRef<HTMLDivElement>(null);
-  const scrollLayerRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
-  const floatingRefs = useRef<Array<HTMLDivElement | null>>([]);
 
-  function resetPointerMotion() {
-    const image = imageRef.current;
-    image?.style.setProperty("--hero-image-x", "0px");
-    image?.style.setProperty("--hero-image-y", "0px");
-    image?.style.setProperty("--hero-image-rotate-x", "0deg");
-    image?.style.setProperty("--hero-image-rotate-y", "0deg");
-    floatingRefs.current.forEach((item) => {
-      item?.style.setProperty("--hero-float-x", "0px");
-      item?.style.setProperty("--hero-float-y", "0px");
-    });
-  }
+  const title1Words = t.hero.title1.split(" ").length;
 
   useEffect(() => {
     const section = sectionRef.current;
-    const scrollLayer = scrollLayerRef.current;
-    if (!section || !scrollLayer) return;
+    if (!section) return;
 
-    const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
 
-    const updateScrollParallax = () => {
-      const progress = motionPreference.matches
-        ? 0
-        : Math.min(1, Math.max(0, -section.getBoundingClientRect().top / section.offsetHeight));
-      scrollLayer.style.setProperty("--hero-scroll-offset", `${-36 * progress}px`);
-      scrollLayer.style.setProperty("--hero-scroll-scale", `${1 - 0.04 * progress}`);
+    // Pausa os loops infinitos (CSS) enquanto o hero está fora da tela.
+    const observer = new IntersectionObserver(([entry]) => {
+      section.dataset.inview = String(entry.isIntersecting);
+    });
+    observer.observe(section);
+
+    // Alvo (ponteiro) e valor atual suavizado. x/y em -1..1; sx/sy em px.
+    const target = { x: 0, y: 0, sx: 0, sy: 0 };
+    const current = { x: 0, y: 0, sx: 0, sy: 0 };
+    let frame = 0;
+    let last = 0;
+    let active = false;
+
+    // Um único loop de rAF, que só roda enquanto há movimento a suavizar,
+    // e escreve apenas 4 custom properties na <section>. O CSS faz o resto.
+    const tick = (now: number) => {
+      const dt = last ? Math.min(now - last, 64) : 16;
+      last = now;
+      const a = 1 - Math.exp(-dt / 110); // suavização independente do FPS
+      const aSpot = 1 - Math.exp(-dt / 170);
+
+      current.x += (target.x - current.x) * a;
+      current.y += (target.y - current.y) * a;
+      current.sx += (target.sx - current.sx) * aSpot;
+      current.sy += (target.sy - current.sy) * aSpot;
+
+      section.style.setProperty("--px", current.x.toFixed(4));
+      section.style.setProperty("--py", current.y.toFixed(4));
+      section.style.setProperty("--sx", `${current.sx.toFixed(1)}px`);
+      section.style.setProperty("--sy", `${current.sy.toFixed(1)}px`);
+
+      const settled =
+        Math.abs(target.x - current.x) < 0.001 &&
+        Math.abs(target.y - current.y) < 0.001 &&
+        Math.abs(target.sx - current.sx) < 0.5 &&
+        Math.abs(target.sy - current.sy) < 0.5;
+
+      if (settled) {
+        frame = 0;
+        last = 0;
+        return;
+      }
+      frame = requestAnimationFrame(tick);
     };
 
-    window.addEventListener("scroll", updateScrollParallax, { passive: true });
-    window.addEventListener("resize", updateScrollParallax, { passive: true });
-    motionPreference.addEventListener("change", updateScrollParallax);
-    updateScrollParallax();
+    const wake = () => {
+      if (!frame) frame = requestAnimationFrame(tick);
+    };
+
+    const onMove = (event: globalThis.PointerEvent) => {
+      if (event.pointerType !== "mouse") return;
+      if (reduceMotion.matches || !finePointer.matches) return;
+
+      const rect = section.getBoundingClientRect();
+      target.x = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width - 0.5) * 2));
+      target.y = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height - 0.5) * 2));
+      target.sx = event.clientX - rect.left;
+      target.sy = event.clientY - rect.top;
+
+      if (!active) {
+        // primeira entrada: a luz nasce sob o cursor em vez de voar do centro
+        active = true;
+        current.sx = target.sx;
+        current.sy = target.sy;
+        section.dataset.pointer = "active";
+      }
+      wake();
+    };
+
+    const onLeave = () => {
+      active = false;
+      section.dataset.pointer = "idle";
+      target.x = 0;
+      target.y = 0;
+      wake();
+    };
+
+    section.addEventListener("pointermove", onMove, { passive: true });
+    section.addEventListener("pointerleave", onLeave);
 
     return () => {
-      window.removeEventListener("scroll", updateScrollParallax);
-      window.removeEventListener("resize", updateScrollParallax);
-      motionPreference.removeEventListener("change", updateScrollParallax);
+      section.removeEventListener("pointermove", onMove);
+      section.removeEventListener("pointerleave", onLeave);
+      observer.disconnect();
+      if (frame) cancelAnimationFrame(frame);
     };
   }, []);
-
-  function handleMouseMove(event: MouseEvent<HTMLElement>) {
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-      resetPointerMotion();
-      return;
-    }
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      resetPointerMotion();
-      return;
-    }
-
-    const sectionBounds = sectionRef.current?.getBoundingClientRect();
-    if (!sectionBounds) return;
-
-    const pointerX = (event.clientX - sectionBounds.left) / sectionBounds.width;
-    const pointerY = (event.clientY - sectionBounds.top) / sectionBounds.height;
-    floatingRefs.current.forEach((item) => {
-      if (!item) return;
-      const depth = Number(item.dataset.depth ?? 24);
-      item.style.setProperty("--hero-float-x", `${(0.5 - pointerX) * depth}px`);
-      item.style.setProperty("--hero-float-y", `${(0.5 - pointerY) * depth}px`);
-    });
-
-    const artBounds = artRef.current?.getBoundingClientRect();
-    const image = imageRef.current;
-    const pointerOverImage =
-      artBounds &&
-      event.clientX >= artBounds.left &&
-      event.clientX <= artBounds.right &&
-      event.clientY >= artBounds.top &&
-      event.clientY <= artBounds.bottom;
-    if (!artBounds || !pointerOverImage || !image) {
-      image?.style.setProperty("--hero-image-x", "0px");
-      image?.style.setProperty("--hero-image-y", "0px");
-      image?.style.setProperty("--hero-image-rotate-x", "0deg");
-      image?.style.setProperty("--hero-image-rotate-y", "0deg");
-      return;
-    }
-
-    const artX = (event.clientX - artBounds.left) / artBounds.width;
-    const artY = (event.clientY - artBounds.top) / artBounds.height;
-    image.style.setProperty("--hero-image-x", `${(0.5 - artX) * 22}px`);
-    image.style.setProperty("--hero-image-y", `${(artY - 0.5) * 18}px`);
-    image.style.setProperty("--hero-image-rotate-x", `${(0.5 - artY) * 22}deg`);
-    image.style.setProperty("--hero-image-rotate-y", `${(artX - 0.5) * 28}deg`);
-  }
 
   return (
     <section
       id="home"
       ref={sectionRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={resetPointerMotion}
       className="hero-section relative isolate overflow-hidden"
     >
       <div className="hero-grid pointer-events-none absolute inset-0" />
       <div className="hero-ambient-glow pointer-events-none absolute" />
-      {[
-        "hero-pebble-one",
-        "hero-pebble-two",
-        "hero-pebble-three",
-        "hero-pebble-four",
-        "hero-pebble-five",
-        "hero-pebble-six",
-        "hero-pebble-seven",
-      ].map((className, index) => (
+      <div className="hero-spotlight pointer-events-none absolute" aria-hidden="true" />
+
+      {PEBBLES.map((className, index) => (
         <div
           key={className}
-          ref={(element) => {
-            floatingRefs.current[index] = element;
-          }}
-          data-depth={22 + index * 6}
+          style={vars({ "--depth": 22 + index * 6, "--i": index })}
           className={`hero-pebble ${className} pointer-events-none absolute`}
           aria-hidden="true"
         >
@@ -138,18 +234,17 @@ export default function Hero() {
       ))}
 
       <div className="hero-layout relative z-10 mx-auto">
-        <div ref={artRef} className="hero-art-frame relative">
+        <div className="hero-art-frame relative">
           <div className="hero-art-orbit pointer-events-none absolute inset-0" />
-          <div ref={scrollLayerRef} className="hero-scroll-parallax absolute inset-0">
-            <div ref={imageRef} className="hero-image-reveal absolute inset-0" aria-hidden="true">
+          <div className="hero-scroll-parallax absolute inset-0">
+            <div className="hero-image-reveal absolute inset-0" aria-hidden="true">
               <Image
                 src="/Gemini_Generated_Image_.png"
                 alt=""
                 fill
                 priority
                 sizes="(max-width: 767px) 100vw, (max-width: 1023px) 75vw, 48vw"
-                style={{ objectFit: "contain", objectPosition: "center" }}
-                className="hero-art-image object-contain"
+                className="hero-art-image object-contain object-center"
               />
             </div>
           </div>
@@ -157,26 +252,31 @@ export default function Hero() {
 
         <div className="hero-copy">
           <div
-            ref={(element) => {
-              floatingRefs.current[7] = element;
-            }}
-            data-depth="36"
+            style={vars({ "--depth": 36, "--i": 7 })}
             className="hero-pebble hero-pebble-copy pointer-events-none absolute"
             aria-hidden="true"
           >
             <span />
           </div>
-          <div className="hero-availability hero-enter hero-enter-1 mb-6 inline-flex items-center gap-2.5 rounded-full px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] sm:text-xs">
-            <span className="hero-status-dot relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full opacity-50" />
-              <span className="relative inline-flex size-2 rounded-full" />
-            </span>
-            {t.hero.available}
+
+          <div className="hero-meta mb-6 flex flex-wrap items-center gap-2">
+            <div className="hero-availability hero-enter hero-enter-1 inline-flex items-center gap-2.5 rounded-full px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] sm:text-xs">
+              <span className="hero-status-dot relative flex size-2">
+                <span className="absolute inline-flex size-full animate-ping rounded-full opacity-50" />
+                <span className="relative inline-flex size-2 rounded-full" />
+              </span>
+              {t.hero.available}
+            </div>
+            <PortoAlegreClock />
           </div>
 
           <h1 className="hero-title">
-            <span className="hero-line block">{t.hero.title1}</span>
-            <span className="hero-line hero-title-accent block">{t.hero.title2}</span>
+            <span className="block">
+              <TitleWords text={t.hero.title1} />
+            </span>
+            <span className="hero-title-accent">
+              <TitleWords text={t.hero.title2} offset={title1Words} />
+            </span>
           </h1>
 
           <p className="hero-role hero-enter hero-enter-2 mt-5 text-xs font-medium uppercase leading-relaxed tracking-[0.12em] sm:text-sm">
@@ -186,38 +286,59 @@ export default function Hero() {
             {t.hero.description}
           </p>
 
-          <div
-            className="hero-tech-list hero-enter hero-enter-4 mt-6 flex flex-wrap gap-2"
-            aria-label="Tecnologias"
-          >
-            {TECHS.map((tech) => (
-              <span key={tech} className="hero-tech rounded-full px-3 py-1.5 font-mono text-[10px]">
+          <ul className="hero-tech-list mt-6 flex flex-wrap gap-2" aria-label="Tecnologias">
+            {TECHS.map((tech, i) => (
+              <li
+                key={tech}
+                style={vars({ "--t": i })}
+                className="hero-tech rounded-full px-3 py-1.5 font-mono text-[10px]"
+              >
                 {tech}
-              </span>
+              </li>
             ))}
-          </div>
+          </ul>
 
           <div className="hero-actions hero-enter hero-enter-5 mt-7 flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => scrollTo("servicos")}
-              className="magnetic-button hero-primary-button inline-flex min-h-12 items-center gap-2 rounded-full px-6 py-3 text-sm font-bold transition-transform"
+            <a
+              href="#servicos"
+              onPointerMove={pullButton}
+              onPointerLeave={releaseButton}
+              className="hero-magnetic hero-primary-button inline-flex min-h-12 items-center gap-2 rounded-full px-6 py-3 text-sm font-bold"
             >
               {t.hero.cta_projects}
               <ArrowRight size={16} aria-hidden="true" />
-            </button>
-            <button
-              onClick={() => scrollTo("contato")}
-              className="hero-secondary-button inline-flex min-h-12 items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-colors"
+            </a>
+            <a
+              href="#contato"
+              onPointerMove={pullButton}
+              onPointerLeave={releaseButton}
+              className="hero-magnetic hero-secondary-button inline-flex min-h-12 items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold"
             >
               {t.hero.cta_contact}
-            </button>
+            </a>
           </div>
         </div>
       </div>
 
-      <div className="hero-scroll absolute bottom-6 left-5 z-10 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] sm:left-8 lg:left-12">
+      <div className="hero-scroll absolute left-5 z-10 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] sm:left-8 lg:left-12">
         <ArrowDown size={14} aria-hidden="true" />
         {t.hero.scroll}
+      </div>
+
+      {/* Faixa inclinada: transição visual hero → próxima seção (decorativa) */}
+      <div className="hero-marquee" aria-hidden="true">
+        <div className="hero-marquee-track">
+          {[0, 1].map((group) => (
+            <div key={group} className="hero-marquee-group">
+              {MARQUEE_ROW.map((word, i) => (
+                <span key={`${word}-${i}`} className="hero-marquee-item">
+                  {word}
+                  <span className="hero-marquee-dot" />
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
