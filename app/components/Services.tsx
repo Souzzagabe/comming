@@ -3,6 +3,7 @@
 import { useEffect, useRef, type CSSProperties, type PointerEvent } from "react";
 import { ArrowRight, BookOpen, Globe, Layout, Link2, Server, Sparkles } from "lucide-react";
 import { useI18n } from "@/app/contexts/i18n-context";
+import StoneField from "./StoneField";
 
 const ICONS = [Globe, Layout, Server, Link2, Sparkles, BookOpen] as const;
 
@@ -58,6 +59,9 @@ export default function Services() {
         </div>
       ))}
 
+      <div className="stone-dust services-dust pointer-events-none absolute inset-0" aria-hidden="true" />
+      <StoneField variant="services" />
+
       <div
         className="absolute inset-x-0 top-0 h-px"
         aria-hidden="true"
@@ -78,7 +82,7 @@ export default function Services() {
           {/* text-shadow:none → o `main h2` global engrossava o texto preto sobre o amarelo */}
           <h2
             id="servicos-title"
-            className="title-3d-ink max-w-3xl font-black leading-[1.05] tracking-tight text-balance"
+            className="heading-flat max-w-3xl font-black leading-[1.05] tracking-tight text-balance text-black"
             style={{ fontSize: "clamp(2rem, 4.6vw, 3.5rem)" }}
           >
             {t.services.title}

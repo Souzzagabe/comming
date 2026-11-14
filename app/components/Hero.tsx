@@ -4,6 +4,7 @@ import { Fragment, useEffect, useRef, useState, type CSSProperties, type Pointer
 import Image from "next/image";
 import { ArrowDown, ArrowRight, MapPin } from "lucide-react";
 import { useI18n } from "@/app/contexts/i18n-context";
+import StoneField from "./StoneField";
 
 const TECHS = ["Next.js", "React", "TypeScript", "Node.js", "Angular", "PHP"];
 
@@ -239,6 +240,8 @@ export default function Hero() {
       <div className="hero-grid pointer-events-none absolute inset-0" />
       <div className="hero-ambient-glow pointer-events-none absolute" />
       <div className="hero-spotlight pointer-events-none absolute" aria-hidden="true" />
+      <div className="stone-dust hero-dust pointer-events-none absolute inset-0" aria-hidden="true" />
+      <StoneField variant="hero" />
 
       {PEBBLES.map((className, index) => (
         <div

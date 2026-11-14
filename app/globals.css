@@ -167,121 +167,113 @@ button:not(:disabled),
   }
 }
 
-/* ─── Page loader ─── */
+/* ─── Page loader ───
+   Preto + amarelo: contador real, anel de progresso e cortina curva que sobe
+   revelando o hero (amarelo). `data-mode="quick"` = visitas repetidas / reduced motion. */
 .page-loader {
-  --pl-yellow: #f0cc31;
-  --pl-ink: #090909;
-  --pl-ease: cubic-bezier(0.76, 0, 0.24, 1);
-
+  --pl-in: cubic-bezier(0.16, 1, 0.3, 1);
+  --pl-curtain: cubic-bezier(0.76, 0, 0.24, 1);
+  --p: 0;
   position: fixed;
   inset: 0;
   z-index: 100;
   display: grid;
-  place-items: center;
+  grid-template-rows: auto 1fr auto;
+  padding: clamp(1.25rem, 4vw, 3rem) clamp(1.25rem, 4vw, 3rem) clamp(1.5rem, 4vw, 3rem);
   overflow: hidden;
-  color: var(--pl-ink);
+  background-color: #060606;
+  background-image: radial-gradient(rgb(255 255 255 / 7%) 1px, transparent 1px);
+  background-size: 28px 28px;
+  color: var(--color-primary, #f2c913);
+  border-radius: 0;
+  transition:
+    transform 1000ms var(--pl-curtain) 250ms,
+    border-radius 700ms var(--pl-curtain) 250ms;
 }
 
 .page-loader-exiting {
   pointer-events: none;
-}
-
-/* Cortinas: duas metades amarelas que se abrem revelando o hero */
-.page-loader-curtain {
-  position: absolute;
-  right: 0;
-  left: 0;
-  height: 50.5%; /* sobreposição evita linha entre as metades */
-  background: var(--pl-yellow);
-  transition: transform 700ms var(--pl-ease);
-  will-change: transform;
-}
-
-.page-loader-curtain-top {
-  top: 0;
-  border-bottom: 2px solid var(--pl-ink);
-}
-
-.page-loader-curtain-bottom {
-  bottom: 0;
-  border-top: 2px solid var(--pl-ink);
-}
-
-.page-loader-exiting .page-loader-curtain-top {
   transform: translate3d(0, -101%, 0);
+  /* a borda de baixo "curva" enquanto a cortina sobe */
+  border-radius: 0 0 50% 50% / 0 0 10vw 10vw;
 }
 
-.page-loader-exiting .page-loader-curtain-bottom {
-  transform: translate3d(0, 101%, 0);
-}
-
-/* Mesmo grid do hero, some junto com o conteúdo */
-.page-loader-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgb(0 0 0 / 4%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(0 0 0 / 4%) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 48%, #000 15%, transparent 78%);
-  transition: opacity 300ms ease;
-}
-
-.page-loader-content {
+.page-loader-top,
+.page-loader-bottom {
   position: relative;
+  z-index: 1;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.page-loader-top {
   align-items: center;
-  gap: 1.5rem;
-  animation: page-loader-enter 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  transition:
-    opacity 350ms ease,
-    transform 500ms var(--pl-ease);
 }
 
-.page-loader-exiting .page-loader-content {
-  opacity: 0;
-  transform: scale(0.94);
+.page-loader-bottom {
+  align-items: flex-end;
 }
 
-.page-loader-exiting .page-loader-grid {
-  opacity: 0;
+.page-loader-logo {
+  color: var(--color-foreground, #f5f5f2);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.09em;
 }
 
-/* Retrato + anel de progresso */
-.page-loader-stage {
+.page-loader-logo span {
+  color: var(--color-primary, #f2c913);
+}
+
+.page-loader-meta {
+  color: rgb(245 245 242 / 55%);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.page-loader-center {
   position: relative;
-  width: min(68vw, 300px);
-  aspect-ratio: 1;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-height: 0;
 }
 
 .page-loader-ring {
+  position: relative;
+  width: min(68vw, 22rem, 52svh);
+  aspect-ratio: 1;
+}
+
+.page-loader-ring svg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  overflow: visible;
   transform: rotate(-90deg);
 }
 
-.page-loader-ring circle {
-  fill: none;
-  stroke-width: 1.2;
+.page-loader-track,
+.page-loader-arc {
+  stroke-width: 0.8;
 }
 
-.page-loader-ring-track {
-  stroke: rgb(0 0 0 / 16%);
+.page-loader-track {
+  stroke: rgb(255 255 255 / 10%);
 }
 
-.page-loader-ring-bar {
-  stroke: var(--pl-ink);
-  stroke-linecap: round;
-  transition: stroke-dashoffset 120ms linear;
+.page-loader-arc {
+  stroke: currentColor;
+  stroke-dasharray: 100;
+  stroke-dashoffset: calc(100 - var(--p));
 }
 
 .page-loader-portrait {
   position: absolute;
-  inset: 8%;
+  inset: 11%;
 }
 
 .page-loader-image {
@@ -289,27 +281,97 @@ button:not(:disabled),
   object-position: center;
 }
 
-/* Contador, mesma voz tipográfica dos títulos do site */
 .page-loader-counter {
-  margin: 0;
-  font-family: var(--font-sans), sans-serif;
-  font-size: clamp(2.5rem, 9vw, 4rem);
-  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: baseline;
+  color: var(--color-primary, #f2c913);
+  font-size: clamp(3.5rem, min(17vw, 24svh), 11rem);
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
   letter-spacing: -0.06em;
-  line-height: 1;
+  line-height: 0.8;
 }
 
-.page-loader-counter span {
-  margin-left: 0.08em;
-  font-size: 0.5em;
+.page-loader-counter small {
+  margin-left: 0.15em;
+  color: rgb(245 245 242 / 55%);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.22em;
   letter-spacing: 0;
 }
 
-@keyframes page-loader-enter {
+.page-loader-bar {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 1;
+  height: 3px;
+  background: rgb(255 255 255 / 8%);
+}
+
+.page-loader-bar span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--color-primary, #f2c913);
+  transform: scaleX(calc(var(--p) / 100));
+  transform-origin: left;
+}
+
+/* entrada (backwards: ao terminar, o estado natural volta e a saída pode transicionar) */
+.page-loader-top,
+.page-loader-ring,
+.page-loader-bottom {
+  animation: page-loader-in 800ms var(--pl-in) backwards;
+}
+
+.page-loader-ring {
+  animation-delay: 100ms;
+}
+
+.page-loader-bottom {
+  animation-delay: 200ms;
+}
+
+.page-loader-exiting .page-loader-top,
+.page-loader-exiting .page-loader-center,
+.page-loader-exiting .page-loader-bottom {
+  opacity: 0;
+  transform: translate3d(0, -28px, 0);
+  transition:
+    opacity 350ms ease,
+    transform 500ms ease;
+}
+
+/* visita repetida / reduced motion: tudo mais curto */
+.page-loader[data-mode="quick"] {
+  transition-delay: 0s;
+  transition-duration: 700ms, 500ms;
+}
+
+.page-loader[data-mode="quick"] .page-loader-top,
+.page-loader[data-mode="quick"] .page-loader-ring,
+.page-loader[data-mode="quick"] .page-loader-bottom {
+  animation-duration: 300ms;
+  animation-delay: 0s;
+}
+
+@keyframes page-loader-in {
   from {
     opacity: 0;
-    transform: translate3d(0, 14px, 0) scale(0.97);
+    transform: translate3d(0, 24px, 0);
+  }
+}
+
+@media (max-width: 480px) {
+  .page-loader-role {
+    display: none;
+  }
+}
+
+/* sem JS o loader nunca sairia: não mostre */
+@media (scripting: none) {
+  .page-loader {
+    display: none;
   }
 }
 
@@ -454,16 +516,39 @@ button:not(:disabled),
   box-shadow: 0 0 0 5px rgb(0 0 0 / 8%);
 }
 
-/* ── Pebbles ──
+/* ── Pedras ──
+   Recortadas da própria foto (lascas facetadas pretas, uma rocha dourada, uma desfocada).
+   Sprite 4×4 em /public/shards/shards.webp → cada pedra escolhe a célula com --cx/--cy.
    .hero-pebble      → parallax do mouse (transform) + entrada (scale/opacity)
-   .hero-pebble span → flutuação infinita (transform)
-   Propriedades separadas (scale vs transform) = animações não se atropelam. */
+   .hero-pebble span → a pedra: rotação base (rotate) + flutuação infinita (transform)
+   Propriedades separadas (scale / rotate / transform) = animações não se atropelam. */
+.hero-pebble,
+.services-pebble {
+  --size: 3rem;
+  --cx: 0;
+  --cy: 0;
+  --r: 0deg;
+  --blur: 0px;
+  z-index: 1;
+  width: var(--size);
+  height: var(--size);
+}
+
+.hero-pebble span,
+.services-pebble span {
+  position: absolute;
+  inset: 0;
+  background-image: url("/shards/shards.webp");
+  background-repeat: no-repeat;
+  background-size: 400% 400%;
+  background-position: calc(var(--cx) * 33.3333%) calc(var(--cy) * 33.3333%);
+  rotate: var(--r);
+  filter: blur(var(--blur)) drop-shadow(0 9px 7px rgb(0 0 0 / 24%));
+}
+
 .hero-pebble {
   --depth: 24;
   --i: 0;
-  z-index: 1;
-  width: var(--pebble-width);
-  height: var(--pebble-height);
   transform: translate3d(
     calc(var(--px) * var(--depth) * -0.5px),
     calc(var(--py) * var(--depth) * -0.5px),
@@ -476,148 +561,173 @@ button:not(:disabled),
 }
 
 .hero-pebble span {
-  position: absolute;
-  inset: 0;
-  border: 1px solid rgb(255 255 255 / 12%);
-  border-radius: var(--pebble-shape);
-  background:
-    radial-gradient(ellipse at 28% 22%, rgb(255 255 255 / 22%), transparent 34%),
-    linear-gradient(145deg, #303033 0%, #111113 48%, #050506 100%);
-  box-shadow:
-    inset -4px -5px 8px rgb(0 0 0 / 48%),
-    inset 2px 2px 3px rgb(255 255 255 / 12%),
-    0 10px 24px rgb(0 0 0 / 20%);
   animation: hero-pebble-drift var(--pebble-speed, 6s) ease-in-out infinite alternate;
   animation-delay: calc(var(--i) * -0.9s);
 }
 
 .hero-pebble-one {
-  --pebble-width: 3.8rem;
-  --pebble-height: 2.4rem;
-  --pebble-shape: 39% 61% 55% 45% / 54% 37% 63% 46%;
+  --size: 4.4rem;
+  --cx: 0;
+  --cy: 0;
+  --r: -14deg;
   --pebble-speed: 5.8s;
   top: 15%;
   left: 50%;
 }
 
 .hero-pebble-two {
-  --pebble-width: 2.5rem;
-  --pebble-height: 1.8rem;
-  --pebble-shape: 58% 42% 34% 66% / 50% 62% 38% 50%;
+  --size: 3.6rem;
+  --cx: 3;
+  --cy: 2;
+  --r: 24deg;
   --pebble-speed: 7s;
   top: 26%;
   right: 5%;
 }
 
 .hero-pebble-three {
-  --pebble-width: 3rem;
-  --pebble-height: 2rem;
-  --pebble-shape: 43% 57% 65% 35% / 43% 52% 48% 57%;
+  --size: 3.9rem;
+  --cx: 1;
+  --cy: 0;
+  --r: 10deg;
   --pebble-speed: 6.5s;
   right: 31%;
   bottom: 15%;
 }
 
 .hero-pebble-four {
-  --pebble-width: 2rem;
-  --pebble-height: 1.45rem;
-  --pebble-shape: 62% 38% 49% 51% / 38% 60% 40% 62%;
+  --size: 2.3rem;
+  --cx: 0;
+  --cy: 1;
+  --r: -30deg;
+  --blur: 1.4px;
   --pebble-speed: 5.2s;
-  top: 57%;
-  left: 3%;
+  top: 44%;
+  left: 0.6%;
 }
 
 .hero-pebble-five {
-  --pebble-width: 2.3rem;
-  --pebble-height: 1.6rem;
-  --pebble-shape: 46% 54% 39% 61% / 60% 42% 58% 40%;
+  --size: 3.2rem;
+  --cx: 2;
+  --cy: 3;
+  --r: 15deg;
   --pebble-speed: 7.5s;
   right: 13%;
   bottom: 13%;
 }
 
 .hero-pebble-six {
-  --pebble-width: 2.8rem;
-  --pebble-height: 1.9rem;
-  --pebble-shape: 44% 56% 37% 63% / 58% 43% 57% 42%;
+  --size: 3.4rem;
+  --cx: 2;
+  --cy: 2;
+  --r: -20deg;
   --pebble-speed: 6.8s;
-  top: 24%;
-  left: 3%;
+  top: 11%;
+  left: 36%;
 }
 
 .hero-pebble-seven {
-  --pebble-width: 2.2rem;
-  --pebble-height: 1.55rem;
-  --pebble-shape: 61% 39% 52% 48% / 46% 58% 42% 54%;
+  --size: 4.8rem;
+  --cx: 0;
+  --cy: 3;
+  --r: 0deg;
   --pebble-speed: 5.6s;
   bottom: 18%;
   left: 43%;
 }
 
 .hero-pebble-copy {
-  --pebble-width: 2.7rem;
-  --pebble-height: 1.8rem;
-  --pebble-shape: 41% 59% 57% 43% / 58% 39% 61% 42%;
+  --size: 2.8rem;
+  --cx: 1;
+  --cy: 3;
+  --r: 12deg;
   --pebble-speed: 6.2s;
   top: -2.6rem;
   right: 18%;
 }
 
 .services-pebble {
-  z-index: 1;
-  width: var(--pebble-width);
-  height: var(--pebble-height);
   animation: hero-pebble-drift var(--pebble-speed, 6s) ease-in-out infinite alternate;
 }
 
-.services-pebble span {
-  position: absolute;
-  inset: 0;
-  border: 1px solid rgb(255 255 255 / 12%);
-  border-radius: var(--pebble-shape);
-  background:
-    radial-gradient(ellipse at 28% 22%, rgb(255 255 255 / 22%), transparent 34%),
-    linear-gradient(145deg, #303033 0%, #111113 48%, #050506 100%);
-  box-shadow:
-    inset -4px -5px 8px rgb(0 0 0 / 48%),
-    inset 2px 2px 3px rgb(255 255 255 / 12%),
-    0 10px 24px rgb(0 0 0 / 20%);
-}
-
 .services-pebble-one {
-  --pebble-width: 3.2rem;
-  --pebble-height: 2rem;
-  --pebble-shape: 39% 61% 55% 45% / 54% 37% 63% 46%;
+  --size: 3.8rem;
+  --cx: 2;
+  --cy: 0;
+  --r: 18deg;
   --pebble-speed: 5.8s;
   top: 14%;
   right: 9%;
 }
 
 .services-pebble-two {
-  --pebble-width: 2.1rem;
-  --pebble-height: 1.5rem;
-  --pebble-shape: 58% 42% 34% 66% / 50% 62% 38% 50%;
+  --size: 3.2rem;
+  --cx: 3;
+  --cy: 3;
+  --r: -10deg;
   --pebble-speed: 7s;
   top: 40%;
   left: 2.5%;
 }
 
 .services-pebble-three {
-  --pebble-width: 2.7rem;
-  --pebble-height: 1.8rem;
-  --pebble-shape: 43% 57% 65% 35% / 43% 52% 48% 57%;
+  --size: 3.4rem;
+  --cx: 2;
+  --cy: 1;
+  --r: 30deg;
   --pebble-speed: 6.5s;
   right: 3%;
   bottom: 23%;
 }
 
 .services-pebble-four {
-  --pebble-width: 1.8rem;
-  --pebble-height: 1.3rem;
-  --pebble-shape: 62% 38% 49% 51% / 38% 60% 40% 62%;
+  --size: 2.5rem;
+  --cx: 0;
+  --cy: 2;
+  --r: -25deg;
+  --blur: 1px;
   --pebble-speed: 5.2s;
   bottom: 8%;
   left: 18%;
+}
+
+/* Pedras 3D (WebGL): o canvas cobre a seção; sem WebGL2 os sprites acima continuam valendo */
+.stone-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.stone-canvas-hero {
+  z-index: 11; /* acima do conteúdo e da arte; abaixo do marquee (12) e do grain (20) */
+}
+
+.stone-canvas-services {
+  z-index: 5; /* atrás dos cards (10) */
+}
+
+.hero-section[data-stones="webgl"] .hero-pebble,
+.services-section[data-stones="webgl"] .services-pebble {
+  display: none;
+}
+
+/* Poeira de estilhaços (SVG inline, estática): lascas e pontinhos como os da foto */
+.stone-dust {
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 900' width='900' height='900'><polygon points='776.6,762.5 773.0,770.0 769.7,767.6 765.9,762.7 773.4,761.3' fill='%230b0b0c' opacity='0.55'/><polygon points='861.3,586.3 861.2,589.8 854.4,585.0 858.3,581.5' fill='%230b0b0c' opacity='0.85'/><polygon points='468.6,573.7 468.0,575.8 466.7,575.0 464.9,572.9 465.1,572.3 467.0,572.1' fill='%230b0b0c' opacity='0.9'/><polygon points='353.3,852.1 351.3,856.3 348.9,854.2 347.9,851.0 350.3,851.4' fill='%230b0b0c' opacity='0.9'/><polygon points='25.2,371.2 24.4,373.7 21.2,371.8 19.9,368.3 24.9,368.5' fill='%230b0b0c' opacity='0.85'/><polygon points='114.6,381.4 115.6,384.5 109.1,382.3 109.8,379.8 113.1,378.0' fill='%230b0b0c' opacity='0.7'/><polygon points='743.1,348.5 741.1,352.0 737.4,351.8 738.0,349.1 741.8,347.5' fill='%23a9831c' opacity='0.85'/><polygon points='731.7,230.4 730.4,230.7 729.5,232.2 727.4,230.2 727.9,227.8 730.6,228.2' fill='%230b0b0c' opacity='0.85'/><polygon points='829.8,869.4 828.0,870.9 826.2,870.3 827.2,868.8' fill='%23a9831c' opacity='0.55'/><polygon points='480.3,867.9 478.3,869.4 477.0,868.2 473.7,868.2 476.0,862.4 477.4,862.9' fill='%23a9831c' opacity='0.85'/><polygon points='73.6,283.5 72.1,289.7 65.8,282.9 71.1,279.9' fill='%23a9831c' opacity='0.9'/><polygon points='614.3,803.2 612.8,804.0 611.5,802.6 612.3,801.4' fill='%230b0b0c' opacity='0.55'/><polygon points='786.8,650.7 785.4,653.1 783.7,652.4 781.2,652.4 781.8,648.9 785.8,648.9' fill='%230b0b0c' opacity='0.55'/><polygon points='334.8,136.2 333.7,137.0 333.1,136.4 332.7,135.3 334.7,135.0' fill='%230b0b0c' opacity='0.85'/><polygon points='208.1,819.6 205.3,821.7 199.2,822.8 199.8,821.7 202.8,815.6 204.7,816.8' fill='%230b0b0c' opacity='0.85'/><polygon points='642.7,751.7 639.9,754.3 637.7,751.5 640.8,747.7' fill='%230b0b0c' opacity='0.7'/><polygon points='368.5,177.7 366.4,178.2 365.7,178.5 365.5,176.1 366.4,175.9' fill='%230b0b0c' opacity='0.7'/><polygon points='241.1,636.9 237.1,644.9 229.8,642.5 229.3,636.7 237.2,635.1' fill='%230b0b0c' opacity='0.9'/><polygon points='835.6,646.3 832.4,649.3 826.2,646.8 828.9,642.5 832.0,643.1' fill='%23a9831c' opacity='0.55'/><polygon points='199.2,801.6 198.7,802.9 197.2,803.0 196.8,801.4 198.4,801.2' fill='%230b0b0c' opacity='0.7'/><polygon points='388.7,40.4 388.0,42.5 386.3,42.3 385.6,40.9 386.6,40.3 388.1,39.9' fill='%230b0b0c' opacity='0.85'/><polygon points='471.9,753.3 470.6,753.6 469.8,754.0 468.5,752.8 469.4,751.5 470.1,750.9' fill='%230b0b0c' opacity='0.7'/><polygon points='464.8,362.2 464.2,363.6 463.0,363.3 463.2,362.6 463.6,361.7 465.2,361.6' fill='%230b0b0c' opacity='0.9'/><polygon points='477.6,103.4 474.7,108.2 468.5,110.0 468.0,103.7 473.4,102.5' fill='%230b0b0c' opacity='0.9'/><polygon points='760.9,558.5 759.7,559.7 758.3,559.1 759.9,557.3' fill='%230b0b0c' opacity='0.55'/><polygon points='216.8,662.1 215.9,663.5 214.1,662.8 214.1,660.9 214.6,660.4' fill='%230b0b0c' opacity='0.85'/><polygon points='746.6,380.6 744.4,383.1 737.8,383.2 741.1,378.7 743.7,376.7' fill='%230b0b0c' opacity='0.85'/><polygon points='717.8,433.8 717.4,435.4 715.0,435.9 715.4,433.3 717.1,433.1' fill='%23a9831c' opacity='0.55'/><polygon points='298.4,421.0 297.8,422.6 296.8,422.0 296.8,420.0 297.6,419.9' fill='%230b0b0c' opacity='0.55'/><polygon points='296.3,84.7 294.9,85.5 293.6,84.9 294.0,83.6 295.2,83.3' fill='%230b0b0c' opacity='0.55'/><polygon points='687.7,684.2 686.7,687.1 681.7,681.5 684.1,681.1' fill='%230b0b0c' opacity='0.85'/><polygon points='309.8,590.6 308.6,591.8 306.2,593.0 305.7,591.2 305.6,588.9 308.8,588.0' fill='%230b0b0c' opacity='0.9'/><polygon points='23.0,239.3 19.6,241.7 17.6,239.2 15.0,237.1 15.3,234.7 20.2,233.9' fill='%230b0b0c' opacity='0.7'/><polygon points='764.6,486.8 763.6,488.2 762.4,488.6 761.6,486.8 762.6,485.6 763.0,485.6' fill='%230b0b0c' opacity='0.55'/><polygon points='567.7,369.9 566.8,371.2 566.3,371.0 566.1,369.2 567.6,369.1' fill='%230b0b0c' opacity='0.9'/><polygon points='835.9,645.5 835.4,647.6 833.8,646.2 834.7,645.0' fill='%230b0b0c' opacity='0.85'/><polygon points='414.6,241.7 410.0,245.7 408.1,241.8 406.1,239.5 413.2,237.2' fill='%230b0b0c' opacity='0.55'/><polygon points='254.0,547.2 254.0,550.2 247.9,547.5 249.8,546.3 252.0,543.8' fill='%230b0b0c' opacity='0.85'/><polygon points='101.4,486.7 100.6,487.6 99.6,487.4 99.3,485.6 100.1,485.9' fill='%23a9831c' opacity='0.9'/><polygon points='403.4,666.8 401.4,669.3 398.7,668.5 398.9,667.0 401.8,665.9' fill='%230b0b0c' opacity='0.85'/><polygon points='82.7,82.3 81.0,84.4 77.8,84.7 75.6,83.8 78.3,80.7 79.5,80.4' fill='%230b0b0c' opacity='0.55'/><polygon points='336.7,113.4 333.7,115.3 329.4,115.3 330.4,113.3 332.1,111.4 334.5,110.8' fill='%230b0b0c' opacity='0.7'/><polygon points='662.4,333.3 660.1,335.7 659.3,335.8 658.5,332.8 661.7,332.5' fill='%230b0b0c' opacity='0.85'/><polygon points='70.5,489.4 66.2,493.7 64.0,492.5 63.7,488.0 66.5,488.2' fill='%230b0b0c' opacity='0.9'/><polygon points='686.1,357.0 683.3,360.6 680.2,357.7 680.9,354.2 685.3,354.1' fill='%230b0b0c' opacity='0.7'/><polygon points='793.2,853.2 792.1,853.8 790.2,852.4 791.9,851.9' fill='%230b0b0c' opacity='0.7'/><polygon points='354.0,475.3 353.5,477.8 352.3,476.9 350.5,475.7 352.5,474.3 352.8,474.1' fill='%230b0b0c' opacity='0.9'/><polygon points='529.3,537.5 529.5,539.6 527.1,540.0 525.9,537.4 526.0,536.2 529.1,537.0' fill='%230b0b0c' opacity='0.85'/><polygon points='436.2,205.2 435.1,206.1 434.6,206.3 433.1,203.8 434.5,203.2 435.0,203.3' fill='%23a9831c' opacity='0.85'/><polygon points='376.9,689.3 376.2,690.5 374.6,691.0 374.8,689.0 376.2,687.6' fill='%230b0b0c' opacity='0.85'/><polygon points='794.1,620.8 792.5,621.3 791.9,620.1 793.0,619.1' fill='%23a9831c' opacity='0.7'/><polygon points='845.2,858.4 842.8,859.3 841.9,858.7 843.3,856.4' fill='%230b0b0c' opacity='0.55'/><polygon points='586.4,20.7 585.5,22.6 583.9,21.3 585.0,20.0 586.2,19.2' fill='%230b0b0c' opacity='0.55'/><polygon points='851.8,673.6 851.0,676.0 848.0,676.2 847.9,672.7 849.9,672.6' fill='%230b0b0c' opacity='0.9'/><polygon points='126.8,564.2 126.0,565.6 125.6,566.6 124.0,564.9 124.6,563.4 126.5,564.2' fill='%230b0b0c' opacity='0.85'/><polygon points='687.1,732.9 685.5,734.1 683.7,733.7 683.0,731.6 683.8,731.5 685.5,730.8' fill='%230b0b0c' opacity='0.7'/><polygon points='194.1,301.9 191.8,305.4 187.0,304.7 188.1,301.0 193.9,299.0' fill='%230b0b0c' opacity='0.9'/><polygon points='511.3,33.0 509.5,35.2 507.6,33.9 508.1,32.7 510.3,32.5' fill='%230b0b0c' opacity='0.9'/><polygon points='504.7,242.0 504.0,244.2 502.2,243.8 502.5,241.8 503.4,241.8' fill='%230b0b0c' opacity='0.7'/><polygon points='366.3,699.1 364.9,700.0 363.8,699.4 364.0,698.5 364.8,697.7' fill='%230b0b0c' opacity='0.85'/><polygon points='512.3,162.9 511.3,163.7 510.3,163.3 510.5,161.6 511.5,161.6' fill='%230b0b0c' opacity='0.7'/><polygon points='674.0,436.5 671.8,440.8 669.7,440.5 667.1,439.8 668.8,434.4 673.0,434.4' fill='%230b0b0c' opacity='0.55'/><polygon points='674.4,277.1 672.5,280.9 670.0,281.3 669.7,276.7 672.0,275.4' fill='%230b0b0c' opacity='0.9'/><polygon points='785.6,889.5 784.9,891.1 784.0,890.7 782.8,889.3 783.9,887.3 784.9,887.9' fill='%230b0b0c' opacity='0.7'/><polygon points='33.8,160.4 32.6,162.9 30.1,163.3 29.3,161.7 30.3,158.4 32.6,160.2' fill='%230b0b0c' opacity='0.55'/><polygon points='183.4,746.9 181.6,748.1 181.2,747.3 182.3,746.7' fill='%230b0b0c' opacity='0.55'/><polygon points='280.3,729.8 279.9,731.3 278.9,730.4 278.2,729.9 279.0,728.6 279.6,728.5' fill='%230b0b0c' opacity='0.7'/><polygon points='708.6,339.3 706.8,339.4 704.1,340.2 704.2,336.9 706.8,336.6' fill='%230b0b0c' opacity='0.9'/><polygon points='17.5,525.7 16.4,526.9 15.5,526.0 16.4,525.4' fill='%230b0b0c' opacity='0.55'/><polygon points='557.9,816.1 557.6,817.8 556.9,817.4 556.5,816.8 557.1,815.3 558.4,815.8' fill='%230b0b0c' opacity='0.9'/><polygon points='534.3,689.0 533.6,690.3 531.4,689.2 531.0,687.4 533.1,687.5' fill='%23a9831c' opacity='0.55'/><polygon points='536.4,638.5 535.8,640.7 534.0,640.0 534.4,637.9 536.6,637.4' fill='%230b0b0c' opacity='0.85'/><polygon points='560.3,58.0 558.8,59.5 557.3,58.6 556.6,56.2 559.2,55.7' fill='%230b0b0c' opacity='0.7'/><polygon points='375.0,330.7 371.0,332.9 368.5,333.0 368.9,330.3 372.8,329.0' fill='%230b0b0c' opacity='0.9'/><polygon points='502.0,424.7 499.2,428.8 497.9,427.8 494.7,423.1 501.3,423.1' fill='%230b0b0c' opacity='0.9'/><polygon points='366.2,581.8 364.6,583.3 363.5,582.2 363.6,581.3 365.1,580.7' fill='%23a9831c' opacity='0.7'/><polygon points='364.4,532.6 363.7,533.9 361.2,534.2 360.7,533.3 362.0,530.5 363.4,530.6' fill='%230b0b0c' opacity='0.55'/><polygon points='513.3,579.6 509.4,584.2 506.3,585.2 504.2,580.2 511.5,578.6' fill='%230b0b0c' opacity='0.9'/><polygon points='726.5,357.5 736.1,348.9 741.8,337.5 732.3,346.0' fill='%230b0b0c' opacity='.8'/><polygon points='295.7,534.2 306.1,522.1 314.0,508.3 303.7,520.4' fill='%230b0b0c' opacity='.8'/><polygon points='159.6,222.6 170.1,212.1 177.6,199.3 167.1,209.8' fill='%230b0b0c' opacity='.8'/><polygon points='463.2,487.6 472.1,477.4 477.9,465.2 469.0,475.4' fill='%230b0b0c' opacity='.8'/><polygon points='746.5,711.0 756.3,697.6 762.9,682.4 753.1,695.8' fill='%230b0b0c' opacity='.8'/><polygon points='463.1,337.4 470.7,330.0 475.6,320.6 468.0,328.0' fill='%230b0b0c' opacity='.8'/><polygon points='169.4,721.6 180.3,705.3 187.8,687.3 177.0,703.6' fill='%230b0b0c' opacity='.8'/><polygon points='654.1,639.6 666.8,626.4 677.5,611.6 664.8,624.8' fill='%230b0b0c' opacity='.8'/><polygon points='495.3,335.6 503.1,327.9 507.1,317.7 499.3,325.4' fill='%230b0b0c' opacity='.8'/></svg>");
+  background-size: 900px 900px;
+  opacity: 0.55;
+}
+
+.hero-dust {
+  mask-image: radial-gradient(ellipse 55% 60% at 72% 46%, #000 20%, transparent 75%);
+}
+
+.services-dust {
+  mask-image:
+    radial-gradient(ellipse 28% 38% at 4% 52%, #000 25%, transparent 80%),
+    radial-gradient(ellipse 30% 40% at 97% 70%, #000 25%, transparent 80%);
 }
 
 /* ── Texto ── */
@@ -919,9 +1029,10 @@ body.page-ready .hero-underline::after {
 }
 
 .hero-marquee-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 41% 59% 57% 43% / 58% 39% 61% 42%;
+  width: 0.6rem;
+  height: 0.6rem;
+  /* mini lasca angulosa, no lugar da bolinha */
+  clip-path: polygon(50% 0, 100% 38%, 82% 100%, 16% 92%, 0 34%);
   background: var(--hero-yellow);
 }
 
@@ -1295,11 +1406,25 @@ body.page-ready .hero-underline::after {
     animation: none !important;
   }
 
-  .page-loader *,
-  .page-loader *::before,
-  .page-loader *::after {
+  .page-loader,
+  .page-loader * {
     animation: none !important;
-    transition: none !important;
+  }
+
+  .page-loader {
+    border-radius: 0;
+    transition: opacity 300ms ease !important;
+  }
+
+  .page-loader-exiting {
+    opacity: 0;
+    transform: none;
+  }
+
+  .page-loader-exiting .page-loader-top,
+  .page-loader-exiting .page-loader-center,
+  .page-loader-exiting .page-loader-bottom {
+    transform: none;
   }
 }
 
