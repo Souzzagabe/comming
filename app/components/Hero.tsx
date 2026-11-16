@@ -260,7 +260,7 @@ export default function Hero() {
           <div className="hero-scroll-parallax absolute inset-0">
             <div className="hero-image-reveal absolute inset-0" aria-hidden="true">
               <Image
-                src="/Gemini_Generated_Image_.png"
+                src="/Gemini_Generated_Image_.webp"
                 alt=""
                 fill
                 priority

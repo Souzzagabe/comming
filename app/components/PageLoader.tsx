@@ -196,7 +196,7 @@ export default function PageLoader() {
           </svg>
           <div className="page-loader-portrait">
             <Image
-              src="/Gemini_Generated_Image_.png"
+              src="/Gemini_Generated_Image_.webp"
               alt="Gabriel de Souza"
               fill
               priority
