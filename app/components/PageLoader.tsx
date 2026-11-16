@@ -12,16 +12,18 @@ const MAX_WAIT = 3500; // trava de segurança: nunca prende o visitante além di
  * full  → primeira visita da sessão (contador + cortina completa)
  * quick → visita repetida ou prefers-reduced-motion (curto e discreto)
  * min   → tempo mínimo do contador
- * wink  → quanto tempo o emoticon piscando (easter egg) fica na tela antes da cortina subir
+ * wink  → quanto tempo o rostinho piscando (easter egg) fica na tela antes da cortina subir
+ *          (0 = não aparece; só na primeira visita da sessão, para não cansar)
  * ready → (a partir da saída) libera o hero (page-ready) · done → remove o loader
  */
 const TIMING = {
-  full: { min: 1000, wink: 850, ready: 500, done: 1300 },
-  quick: { min: 350, wink: 450, ready: 250, done: 800 },
+  full: { min: 1000, wink: 700, ready: 500, done: 1300 },
+  quick: { min: 350, wink: 0, ready: 250, done: 800 },
 } as const;
 
 export default function PageLoader() {
   const [phase, setPhase] = useState<LoaderPhase>("loading");
+  const [winked, setWinked] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
 
@@ -84,21 +86,40 @@ export default function PageLoader() {
         sessionStorage.setItem(SESSION_KEY, "1");
       } catch {}
 
-      // easter egg: no lugar da foto aparece um emoticon piscando o olho
-      setPhase("wink");
-      timers.push(
-        window.setTimeout(() => {
-          setPhase("exiting");
-          // o hero começa a entrar enquanto a cortina ainda está subindo
-          timers.push(
-            window.setTimeout(() => {
-              document.body.style.overflow = previousOverflow;
-              document.body.classList.add("page-ready");
-            }, timing.ready),
-          );
-          timers.push(window.setTimeout(() => setPhase("done"), timing.done));
-        }, timing.wink),
-      );
+      // easter egg para quem abre o DevTools 😉 (remova este bloco se não quiser)
+      try {
+        const pt = navigator.language?.toLowerCase().startsWith("pt");
+        console.log(
+          `%cGS.%c ${
+            pt
+              ? "Opa, dev curioso(a) 😉 Gostou do que viu? Vamos conversar: gabweb95@gmail.com"
+              : "Hey, curious dev 😉 Like what you see? Let's talk: gabweb95@gmail.com"
+          }`,
+          "background:#f2c913;color:#000;font-weight:700;padding:2px 8px;border-radius:4px",
+          "color:inherit",
+        );
+      } catch {}
+
+      const exit = () => {
+        setPhase("exiting");
+        // o hero começa a entrar enquanto a cortina ainda está subindo
+        timers.push(
+          window.setTimeout(() => {
+            document.body.style.overflow = previousOverflow;
+            document.body.classList.add("page-ready");
+          }, timing.ready),
+        );
+        timers.push(window.setTimeout(() => setPhase("done"), timing.done));
+      };
+
+      if (timing.wink > 0) {
+        // easter egg: no lugar da foto, um rostinho de traço fino pisca o olho
+        setWinked(true);
+        setPhase("wink");
+        timers.push(window.setTimeout(exit, timing.wink));
+      } else {
+        exit();
+      }
     };
 
     const tick = (now: number) => {
@@ -144,7 +165,7 @@ export default function PageLoader() {
   return (
     <div
       ref={rootRef}
-      className={`page-loader${phase !== "loading" ? " page-loader-wink" : ""}${
+      className={`page-loader${winked ? " page-loader-wink" : ""}${
         phase === "exiting" ? " page-loader-exiting" : ""
       }`}
       data-mode="full"
@@ -185,34 +206,13 @@ export default function PageLoader() {
             />
           </div>
 
-          {/* easter egg: ao chegar em 100%, o emoticon pisca o olho no lugar da foto */}
+          {/* easter egg discreto: ao chegar em 100%, um rostinho de traço fino pisca dentro do anel */}
           <div className="page-loader-emoji" aria-hidden="true">
-            <svg viewBox="0 0 120 120">
-              <defs>
-                <radialGradient id="pl-face-grad" cx="34%" cy="28%" r="85%">
-                  <stop offset="0" stopColor="#ffe766" />
-                  <stop offset="0.55" stopColor="#f2c913" />
-                  <stop offset="1" stopColor="#d4a508" />
-                </radialGradient>
-              </defs>
-              <g className="pl-face">
-                <circle cx="60" cy="60" r="54" fill="url(#pl-face-grad)" />
-                <circle cx="25" cy="69" r="9" fill="#ff7a2f" opacity="0.22" />
-                <circle cx="95" cy="69" r="9" fill="#ff7a2f" opacity="0.22" />
-                <ellipse cx="42" cy="52" rx="6.8" ry="9" fill="#0a0a0a" />
-                <circle cx="44.3" cy="48.4" r="2.2" fill="#fff" />
-                <path d="M30 37 Q42 31 53 36" fill="none" stroke="#0a0a0a" strokeWidth="4.5" strokeLinecap="round" />
-                <path className="pl-brow-r" d="M67 35 Q78 29 90 35" fill="none" stroke="#0a0a0a" strokeWidth="4.5" strokeLinecap="round" />
-                <ellipse className="pl-eye-open" cx="78" cy="52" rx="6.8" ry="9" fill="#0a0a0a" />
-                <path className="pl-eye-closed" d="M67 56 Q78 43 89 56" fill="none" stroke="#0a0a0a" strokeWidth="5" strokeLinecap="round" />
-                <path d="M33 77 Q58 101 89 72" fill="none" stroke="#0a0a0a" strokeWidth="5.5" strokeLinecap="round" />
-              </g>
-              <g className="pl-sparkle pl-sparkle-a">
-                <path d="M104 12 l2.7 7.6 7.6 2.7 -7.6 2.7 -2.7 7.6 -2.7 -7.6 -7.6 -2.7 7.6 -2.7z" fill="#fff6c8" />
-              </g>
-              <g className="pl-sparkle pl-sparkle-b">
-                <path d="M13 9 l1.7 4.8 4.8 1.7 -4.8 1.7 -1.7 4.8 -1.7 -4.8 -4.8 -1.7 4.8 -1.7z" fill="#fff6c8" />
-              </g>
+            <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round">
+              <circle cx="42" cy="50" r="4.4" fill="currentColor" stroke="none" />
+              <circle className="pl-eye-open" cx="78" cy="50" r="4.4" fill="currentColor" stroke="none" />
+              <path className="pl-eye-closed" d="M69 53 Q78 44 87 53" />
+              <path d="M37 75 Q61 95 84 73" />
             </svg>
           </div>
         </div>
