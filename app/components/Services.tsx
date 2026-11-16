@@ -19,7 +19,8 @@ function trackPointer(event: PointerEvent<HTMLElement>) {
 }
 
 export default function Services() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const isPt = locale === "pt";
   const sectionRef = useRef<HTMLElement>(null);
 
   // Pausa a flutuação infinita dos pebbles quando a seção está fora da tela.
@@ -40,6 +41,27 @@ export default function Services() {
     { title: t.services.s4_title, desc: t.services.s4_desc },
     { title: t.services.s5_title, desc: t.services.s5_desc },
     { title: t.services.s6_title, desc: t.services.s6_desc },
+  ];
+
+  const aiFlow = [
+    { pt: "Especificar", en: "Specify" },
+    { pt: "Planejar", en: "Plan" },
+    { pt: "Quebrar em tarefas", en: "Break into tasks" },
+    { pt: "Implementar com IA", en: "Build with AI" },
+    { pt: "Revisar e testar", en: "Review & test" },
+  ];
+
+  const aiSkills: { pt: string; en: string; core?: boolean }[] = [
+    { pt: "Spec-Driven Development", en: "Spec-Driven Development", core: true },
+    { pt: "Prompt Engineering", en: "Prompt Engineering", core: true },
+    { pt: "Context Engineering", en: "Context Engineering", core: true },
+    { pt: "Revisão de código assistida", en: "AI-assisted code review", core: true },
+    { pt: "Claude Code", en: "Claude Code" },
+    { pt: "GitHub Copilot", en: "GitHub Copilot" },
+    { pt: "Cursor", en: "Cursor" },
+    { pt: "MCP", en: "MCP" },
+    { pt: "Agentes de IA", en: "AI agents" },
+    { pt: "TDD com IA", en: "AI-assisted TDD" },
   ];
 
   return (
@@ -125,9 +147,64 @@ export default function Services() {
           })}
         </ul>
 
+        <article
+          onPointerMove={trackPointer}
+          className="services-card services-reveal mt-10 p-5 sm:p-7"
+          style={vars({ "--i": 7 })}
+          aria-labelledby="services-ai-title"
+        >
+          <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr] lg:gap-12">
+            <div>
+              <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--color-primary)]">
+                {isPt ? "IA no desenvolvimento" : "AI in development"}
+              </span>
+              <h3
+                id="services-ai-title"
+                className="mt-2 text-lg font-semibold text-[var(--color-foreground)]"
+              >
+                {isPt ? "Desenvolvimento orientado por especificações" : "Spec-driven development"}
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-[var(--color-muted)]">
+                {isPt
+                  ? "Uso IA como parceira de engenharia, não como atalho: a especificação define o comportamento esperado, a IA acelera a implementação e eu reviso, testo e assumo a qualidade do que vai para produção."
+                  : "I use AI as an engineering partner, not a shortcut: the spec defines the expected behavior, AI speeds up implementation, and I review, test and own the quality of what ships."}
+              </p>
+
+              <ol
+                className="services-ai-flow mt-5"
+                aria-label={isPt ? "Fluxo de trabalho" : "Workflow"}
+              >
+                {aiFlow.map((step, i) => (
+                  <li key={step.en} className="services-ai-step">
+                    <span className="services-ai-num" aria-hidden="true">
+                      {i + 1}
+                    </span>
+                    {step[locale]}
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <ul className="flex flex-wrap content-start gap-2">
+              {aiSkills.map((item) => (
+                <li
+                  key={item.en}
+                  className={`skill-chip rounded-full border px-3 py-1.5 font-mono text-xs ${
+                    item.core
+                      ? "border-[var(--color-primary)]/40 bg-[var(--color-primary)]/10 text-[var(--color-foreground)]"
+                      : "border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-muted)]"
+                  }`}
+                >
+                  {item[locale]}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </article>
+
         <div
           className="services-reveal mt-10 flex justify-center sm:mt-14"
-          style={vars({ "--i": 7 })}
+          style={vars({ "--i": 8 })}
         >
           <a
             href="#contato"

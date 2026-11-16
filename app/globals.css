@@ -2266,3 +2266,50 @@ body.page-ready .site-header {
     opacity: 0;
   }
 }
+
+/* ─── Solutions: AI-assisted development workflow ─── */
+.services-ai-flow {
+  position: relative;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.services-ai-step {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 0.9rem;
+  font-size: 0.875rem;
+  color: var(--color-foreground);
+}
+
+.services-ai-step:last-child {
+  padding-bottom: 0;
+}
+
+/* conector vertical entre os passos */
+.services-ai-step:not(:last-child)::before {
+  position: absolute;
+  top: 1.6rem;
+  bottom: 0.1rem;
+  left: 0.75rem;
+  width: 1px;
+  background: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+  content: "";
+}
+
+.services-ai-num {
+  display: grid;
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 45%, transparent);
+  border-radius: 999px;
+  background: var(--color-card);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.6875rem;
+  color: var(--color-primary);
+}
