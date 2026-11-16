@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
-type LoaderPhase = "loading" | "exiting" | "done";
+type LoaderPhase = "loading" | "wink" | "exiting" | "done";
 
 const SESSION_KEY = "gs-loader-seen";
 const MAX_WAIT = 3500; // trava de segurança: nunca prende o visitante além disso
@@ -11,11 +11,13 @@ const MAX_WAIT = 3500; // trava de segurança: nunca prende o visitante além di
 /**
  * full  → primeira visita da sessão (contador + cortina completa)
  * quick → visita repetida ou prefers-reduced-motion (curto e discreto)
- * min   → tempo mínimo do contador · ready → libera o hero (page-ready) · done → remove o loader
+ * min   → tempo mínimo do contador
+ * wink  → quanto tempo o emoticon piscando (easter egg) fica na tela antes da cortina subir
+ * ready → (a partir da saída) libera o hero (page-ready) · done → remove o loader
  */
 const TIMING = {
-  full: { min: 1000, ready: 500, done: 1300 },
-  quick: { min: 350, ready: 250, done: 800 },
+  full: { min: 1000, wink: 850, ready: 500, done: 1300 },
+  quick: { min: 350, wink: 450, ready: 250, done: 800 },
 } as const;
 
 export default function PageLoader() {
@@ -82,15 +84,21 @@ export default function PageLoader() {
         sessionStorage.setItem(SESSION_KEY, "1");
       } catch {}
 
-      setPhase("exiting");
-      // o hero começa a entrar enquanto a cortina ainda está subindo
+      // easter egg: no lugar da foto aparece um emoticon piscando o olho
+      setPhase("wink");
       timers.push(
         window.setTimeout(() => {
-          document.body.style.overflow = previousOverflow;
-          document.body.classList.add("page-ready");
-        }, timing.ready),
+          setPhase("exiting");
+          // o hero começa a entrar enquanto a cortina ainda está subindo
+          timers.push(
+            window.setTimeout(() => {
+              document.body.style.overflow = previousOverflow;
+              document.body.classList.add("page-ready");
+            }, timing.ready),
+          );
+          timers.push(window.setTimeout(() => setPhase("done"), timing.done));
+        }, timing.wink),
       );
-      timers.push(window.setTimeout(() => setPhase("done"), timing.done));
     };
 
     const tick = (now: number) => {
@@ -136,7 +144,9 @@ export default function PageLoader() {
   return (
     <div
       ref={rootRef}
-      className={`page-loader${phase === "exiting" ? " page-loader-exiting" : ""}`}
+      className={`page-loader${phase !== "loading" ? " page-loader-wink" : ""}${
+        phase === "exiting" ? " page-loader-exiting" : ""
+      }`}
       data-mode="full"
       role="status"
       aria-live="polite"
@@ -147,7 +157,7 @@ export default function PageLoader() {
         <span className="page-loader-logo">
           GS<span>.</span>
         </span>
-        <span className="page-loader-meta">Gabriel de Souza</span>
+        <span className="page-loader-meta">Portfólio · Gabriel de Souza</span>
       </div>
 
       <div className="page-loader-center">
@@ -173,6 +183,37 @@ export default function PageLoader() {
               sizes="(max-width: 767px) 100vw, (max-width: 1023px) 75vw, 48vw"
               className="page-loader-image"
             />
+          </div>
+
+          {/* easter egg: ao chegar em 100%, o emoticon pisca o olho no lugar da foto */}
+          <div className="page-loader-emoji" aria-hidden="true">
+            <svg viewBox="0 0 120 120">
+              <defs>
+                <radialGradient id="pl-face-grad" cx="34%" cy="28%" r="85%">
+                  <stop offset="0" stopColor="#ffe766" />
+                  <stop offset="0.55" stopColor="#f2c913" />
+                  <stop offset="1" stopColor="#d4a508" />
+                </radialGradient>
+              </defs>
+              <g className="pl-face">
+                <circle cx="60" cy="60" r="54" fill="url(#pl-face-grad)" />
+                <circle cx="25" cy="69" r="9" fill="#ff7a2f" opacity="0.22" />
+                <circle cx="95" cy="69" r="9" fill="#ff7a2f" opacity="0.22" />
+                <ellipse cx="42" cy="52" rx="6.8" ry="9" fill="#0a0a0a" />
+                <circle cx="44.3" cy="48.4" r="2.2" fill="#fff" />
+                <path d="M30 37 Q42 31 53 36" fill="none" stroke="#0a0a0a" strokeWidth="4.5" strokeLinecap="round" />
+                <path className="pl-brow-r" d="M67 35 Q78 29 90 35" fill="none" stroke="#0a0a0a" strokeWidth="4.5" strokeLinecap="round" />
+                <ellipse className="pl-eye-open" cx="78" cy="52" rx="6.8" ry="9" fill="#0a0a0a" />
+                <path className="pl-eye-closed" d="M67 56 Q78 43 89 56" fill="none" stroke="#0a0a0a" strokeWidth="5" strokeLinecap="round" />
+                <path d="M33 77 Q58 101 89 72" fill="none" stroke="#0a0a0a" strokeWidth="5.5" strokeLinecap="round" />
+              </g>
+              <g className="pl-sparkle pl-sparkle-a">
+                <path d="M104 12 l2.7 7.6 7.6 2.7 -7.6 2.7 -2.7 7.6 -2.7 -7.6 -7.6 -2.7 7.6 -2.7z" fill="#fff6c8" />
+              </g>
+              <g className="pl-sparkle pl-sparkle-b">
+                <path d="M13 9 l1.7 4.8 4.8 1.7 -4.8 1.7 -1.7 4.8 -1.7 -4.8 -4.8 -1.7 4.8 -1.7z" fill="#fff6c8" />
+              </g>
+            </svg>
           </div>
         </div>
       </div>

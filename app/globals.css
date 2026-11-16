@@ -248,7 +248,7 @@ button:not(:disabled),
   aspect-ratio: 1;
 }
 
-.page-loader-ring svg {
+.page-loader-ring > svg {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -279,6 +279,146 @@ button:not(:disabled),
 .page-loader-image {
   object-fit: contain;
   object-position: center;
+}
+
+/* ── Easter egg: emoticon piscando o olho (aparece quando o contador chega a 100%) ── */
+.page-loader-portrait {
+  transition:
+    opacity 200ms ease,
+    transform 300ms ease;
+}
+
+.page-loader-wink .page-loader-portrait {
+  opacity: 0;
+  transform: scale(0.88);
+}
+
+.page-loader-emoji {
+  --pl-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: absolute;
+  inset: 8%;
+  opacity: 0;
+}
+
+.page-loader-emoji svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 10px 30px rgb(242 201 19 / 22%));
+}
+
+.pl-face,
+.pl-brow-r,
+.pl-eye-open,
+.pl-sparkle {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Estado natural = piscando (assim "prefers-reduced-motion" já mostra o 😉).
+   As animações partem do rosto com os dois olhos abertos. */
+.pl-face {
+  transform: rotate(5deg);
+}
+
+.pl-eye-open {
+  opacity: 0;
+}
+
+.pl-brow-r {
+  transform: translateY(-4px) rotate(-5deg);
+}
+
+.page-loader-wink .page-loader-emoji {
+  opacity: 1;
+  animation: pl-emoji-in 520ms var(--pl-spring) backwards;
+}
+
+.page-loader-wink .page-loader-ring {
+  animation: pl-ring-pulse 700ms var(--pl-in) both;
+}
+
+.page-loader-wink .pl-face {
+  animation: pl-tilt 600ms var(--pl-spring) 120ms backwards;
+}
+
+.page-loader-wink .pl-eye-open {
+  animation: pl-eye-close 150ms ease-in 300ms backwards;
+}
+
+.page-loader-wink .pl-eye-closed {
+  animation: pl-eye-in 130ms ease-out 360ms backwards;
+}
+
+.page-loader-wink .pl-brow-r {
+  animation: pl-brow 220ms ease-out 300ms backwards;
+}
+
+.page-loader-wink .pl-sparkle-a {
+  animation: pl-sparkle 520ms var(--pl-spring) 380ms backwards;
+}
+
+.page-loader-wink .pl-sparkle-b {
+  animation: pl-sparkle 520ms var(--pl-spring) 470ms backwards;
+}
+
+.page-loader[data-mode="quick"] .page-loader-emoji,
+.page-loader[data-mode="quick"] .pl-face,
+.page-loader[data-mode="quick"] .pl-eye-open,
+.page-loader[data-mode="quick"] .pl-eye-closed,
+.page-loader[data-mode="quick"] .pl-brow-r,
+.page-loader[data-mode="quick"] .pl-sparkle {
+  animation-duration: 260ms;
+  animation-delay: 0s;
+}
+
+@keyframes pl-emoji-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4) translateY(10px);
+  }
+}
+
+@keyframes pl-ring-pulse {
+  40% {
+    transform: scale(1.045);
+  }
+}
+
+@keyframes pl-tilt {
+  from {
+    transform: rotate(-8deg);
+  }
+}
+
+@keyframes pl-eye-close {
+  from {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(0.12);
+  }
+}
+
+@keyframes pl-eye-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes pl-brow {
+  from {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes pl-sparkle {
+  from {
+    opacity: 0;
+    transform: scale(0) rotate(-90deg);
+  }
 }
 
 .page-loader-counter {
@@ -1419,6 +1559,10 @@ body.page-ready .hero-underline::after {
   .page-loader-exiting {
     opacity: 0;
     transform: none;
+  }
+
+  .page-loader-wink .page-loader-emoji {
+    opacity: 1;
   }
 
   .page-loader-exiting .page-loader-top,
