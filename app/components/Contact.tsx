@@ -1,20 +1,10 @@
 ﻿"use client";
 
-import Script from "next/script";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type FormEvent,
-  type PointerEvent,
-} from "react";
+import { useRef, useState, type CSSProperties, type FormEvent, type PointerEvent } from "react";
 import {
   ArrowUpRight,
   Check,
   Clock,
-  Loader2,
   Mail,
   MapPin,
   MessageCircle,
@@ -23,24 +13,8 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/app/contexts/i18n-context";
 
-interface TurnstileOptions {
-  sitekey: string;
-  action: "contact";
-  theme: "dark";
-  callback: (token: string) => void;
-  "expired-callback": () => void;
-  "error-callback": () => void;
-}
-
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (container: HTMLElement, options: TurnstileOptions) => string;
-      remove: (widgetId: string) => void;
-      reset: (widgetId: string) => void;
-    };
-  }
-}
+const EMAIL = "gabweb95@gmail.com";
+const WHATSAPP_NUMBER = "5551989125407";
 
 const vars = (v: Record<string, string | number>) => v as CSSProperties;
 
@@ -58,125 +32,85 @@ function trackPointer(event: PointerEvent<HTMLElement>) {
   el.style.setProperty("--my", `${event.clientY - rect.top}px`);
 }
 
+type Draft = { name: string; email: string; subject: string; message: string };
+
+/**
+ * Contato 100% estático: nenhuma rota /api, nenhum serviço externo.
+ * O formulário monta a mensagem e entrega para o app de e-mail ou WhatsApp
+ * do visitante. Funciona em qualquer hospedagem (inclusive export estático).
+ */
 export default function Contact() {
-  const { t } = useI18n();
-  const turnstileRef = useRef<HTMLDivElement>(null);
-  const turnstileId = useRef<string | null>(null);
+  const { t, locale } = useI18n();
+  const isPt = locale === "pt";
+  const formRef = useRef<HTMLFormElement>(null);
   const resetTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState("");
-  const [captchaError, setCaptchaError] = useState("");
+  const [done, setDone] = useState(false);
   const [humanConfirmed, setHumanConfirmed] = useState(false);
-  const [submitError, setSubmitError] = useState("");
-  const [turnstileReady, setTurnstileReady] = useState(false);
-  // O script do Cloudflare só é baixado quando a pessoa começa a preencher o formulário.
-  const [loadCaptcha, setLoadCaptcha] = useState(false);
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const [humanError, setHumanError] = useState("");
 
-  const renderTurnstile = useCallback(() => {
-    if (!siteKey || !window.turnstile || !turnstileRef.current || turnstileId.current) return;
+  const copy = {
+    viaWhatsApp: isPt ? "Enviar pelo WhatsApp" : "Send via WhatsApp",
+    hint: isPt
+      ? "O envio abre seu app de e-mail ou WhatsApp com a mensagem pronta — nada passa por servidores de terceiros."
+      : "Sending opens your email or WhatsApp app with the message ready — nothing goes through third-party servers.",
+    wa: isPt
+      ? "Olá, gostaria de um orçamento"
+      : "Hi, I'd like to request a quote",
+  };
 
-    turnstileId.current = window.turnstile.render(turnstileRef.current, {
-      sitekey: siteKey,
-      action: "contact",
-      theme: "dark",
-      callback: (token) => {
-        setCaptchaToken(token);
-        setCaptchaError("");
-      },
-      "expired-callback": () => {
-        setCaptchaToken("");
-        setCaptchaError(t.contact.captcha_required);
-      },
-      "error-callback": () => {
-        setCaptchaToken("");
-        setCaptchaError(t.contact.captcha_unavailable);
-      },
-    });
-  }, [siteKey, t.contact.captcha_required, t.contact.captcha_unavailable]);
+  function readDraft(): Draft | null {
+    const form = formRef.current;
+    if (!form) return null;
+    if (!form.reportValidity()) return null;
+    const data = new FormData(form);
 
-  useEffect(() => {
-    if (!turnstileReady) return;
-    renderTurnstile();
+    // honeypot: campo invisível que só robôs preenchem
+    if (String(data.get("website") ?? "") !== "") return null;
 
-    return () => {
-      if (turnstileId.current && window.turnstile) {
-        window.turnstile.remove(turnstileId.current);
-        turnstileId.current = null;
-      }
+    if (!humanConfirmed) {
+      setHumanError(t.contact.captcha_required);
+      return null;
+    }
+    return {
+      name: String(data.get("name") ?? "").trim(),
+      email: String(data.get("email") ?? "").trim(),
+      subject: String(data.get("subject") ?? "").trim(),
+      message: String(data.get("message") ?? "").trim(),
     };
-  }, [renderTurnstile, turnstileReady]);
+  }
 
-  useEffect(() => () => clearTimeout(resetTimer.current), []);
-
-  function resetCaptcha() {
-    setCaptchaToken("");
+  function flagDone() {
+    setDone(true);
     setHumanConfirmed(false);
-    if (turnstileId.current && window.turnstile) {
-      window.turnstile.reset(turnstileId.current);
-    }
+    setHumanError("");
+    formRef.current?.reset();
+    clearTimeout(resetTimer.current);
+    resetTimer.current = setTimeout(() => setDone(false), 5000);
   }
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if ((siteKey && !captchaToken) || (!siteKey && !humanConfirmed)) {
-      setCaptchaError(t.contact.captcha_required);
-      return;
-    }
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const draft = readDraft();
+    if (!draft) return;
 
-    setLoading(true);
-    setSubmitError("");
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.get("name"),
-          email: formData.get("email"),
-          subject: formData.get("subject"),
-          message: formData.get("message"),
-          website: formData.get("website"),
-          captchaToken: captchaToken || undefined,
-          humanConfirmed,
-        }),
-      });
-      const result: { success?: boolean; error?: string; code?: string } = await response.json();
-
-      if (!response.ok || !result.success) {
-        if (
-          result.code === "CAPTCHA_REQUIRED" ||
-          result.code === "CAPTCHA_INVALID" ||
-          result.code === "HUMAN_VERIFICATION_REQUIRED"
-        ) {
-          setCaptchaError(t.contact.captcha_required);
-        } else if (result.code === "CAPTCHA_UNAVAILABLE") {
-          setCaptchaError(t.contact.captcha_unavailable);
-        } else {
-          setSubmitError(t.contact.send_error);
-        }
-        resetCaptcha();
-        return;
-      }
-
-      setSubmitted(true);
-      form.reset();
-      resetCaptcha();
-      clearTimeout(resetTimer.current);
-      resetTimer.current = setTimeout(() => setSubmitted(false), 5000);
-    } catch {
-      setSubmitError(t.contact.send_error);
-      resetCaptcha();
-    } finally {
-      setLoading(false);
-    }
+    const body = `${draft.message}\n\n—\n${draft.name} <${draft.email}>`;
+    const href = `mailto:${EMAIL}?subject=${encodeURIComponent(draft.subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = href;
+    flagDone();
   }
 
-  const blocked =
-    Boolean((siteKey && !captchaToken) || (!siteKey && !humanConfirmed)) || loading || submitted;
+  function handleWhatsApp() {
+    const draft = readDraft();
+    if (!draft) return;
+
+    const text = `${draft.subject}\n\n${draft.message}\n\n— ${draft.name} (${draft.email})`;
+    window.open(
+      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
+    flagDone();
+  }
 
   return (
     <section
@@ -218,8 +152,8 @@ export default function Contact() {
 
         <div className="mt-8 grid gap-6 sm:mt-10 sm:gap-8 lg:grid-cols-5 lg:gap-12">
           <form
+            ref={formRef}
             onSubmit={handleSubmit}
-            onFocus={() => setLoadCaptcha(true)}
             style={vars({ "--i": 1 })}
             className="contact-reveal relative min-w-0 space-y-5 rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors focus-within:border-[var(--color-primary)]/35 sm:p-6 md:p-8 lg:col-span-3"
           >
@@ -296,89 +230,68 @@ export default function Contact() {
               />
             </div>
 
-            {siteKey && (
-              <>
-                {loadCaptcha && (
-                  <Script
-                    src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
-                    strategy="afterInteractive"
-                    onReady={() => setTurnstileReady(true)}
-                    onError={() => setCaptchaError(t.contact.captcha_unavailable)}
-                  />
-                )}
-                {/* espaço reservado assim que o foco acontece → sem salto de layout */}
-                <div ref={turnstileRef} className={loadCaptcha ? "min-h-[65px]" : "hidden"} />
-                {captchaError && (
-                  <p className="text-sm text-red-400" role="alert">
-                    {captchaError}
-                  </p>
-                )}
-              </>
-            )}
-
-            {!siteKey && (
-              <label className="flex min-h-14 cursor-pointer items-center justify-between gap-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] px-4 py-3">
-                <span className="flex items-center gap-3 text-sm text-[var(--color-foreground)]">
-                  <input
-                    type="checkbox"
-                    checked={humanConfirmed}
-                    onChange={(event) => {
-                      setHumanConfirmed(event.target.checked);
-                      setCaptchaError("");
-                    }}
-                    aria-invalid={Boolean(captchaError)}
-                    aria-describedby={captchaError ? "captcha-error" : undefined}
-                    className="size-5 cursor-pointer accent-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
-                  />
-                  {t.contact.human_confirmation}
-                </span>
-                <ShieldCheck
-                  size={22}
-                  aria-hidden="true"
-                  className={
-                    humanConfirmed ? "text-[var(--color-primary)]" : "text-[var(--color-muted)]"
-                  }
+            <label className="contact-human flex min-h-14 cursor-pointer items-center justify-between gap-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] px-4 py-3">
+              <span className="flex items-center gap-3 text-sm text-[var(--color-foreground)]">
+                <input
+                  type="checkbox"
+                  checked={humanConfirmed}
+                  onChange={(event) => {
+                    setHumanConfirmed(event.target.checked);
+                    if (event.target.checked) setHumanError("");
+                  }}
+                  aria-invalid={Boolean(humanError)}
+                  aria-describedby={humanError ? "human-error" : undefined}
+                  className="size-5 cursor-pointer accent-[var(--color-primary)]"
                 />
-              </label>
-            )}
+                {t.contact.human_confirmation}
+              </span>
+              <ShieldCheck
+                size={22}
+                aria-hidden="true"
+                className={humanConfirmed ? "text-[var(--color-primary)]" : "text-[var(--color-muted)]"}
+              />
+            </label>
 
-            {captchaError && !siteKey && (
-              <p id="captcha-error" className="text-sm text-red-400" role="alert">
-                {captchaError}
+            {humanError && (
+              <p id="human-error" className="text-sm text-red-400" role="alert">
+                {humanError}
               </p>
             )}
 
-            {submitError && (
-              <p className="text-sm text-red-400" role="alert">
-                {submitError}
-              </p>
-            )}
+            <p className="text-xs leading-relaxed text-[var(--color-muted)]">{copy.hint}</p>
 
-            {/* anuncia o sucesso para leitores de tela */}
             <p className="sr-only" role="status" aria-live="polite">
-              {submitted ? t.contact.success : ""}
+              {done ? t.contact.success : ""}
             </p>
 
-            <button
-              type="submit"
-              disabled={blocked}
-              className={`magnetic-button group relative flex min-h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-full px-5 py-3.5 text-center text-sm font-bold text-black transition-[background-color,box-shadow,transform,opacity] hover:shadow-lg hover:shadow-[var(--color-primary)]/25 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-primary)] active:scale-[0.98] disabled:cursor-not-allowed sm:w-auto sm:px-8 ${
-                submitted ? "bg-[#25d366]" : "bg-[var(--color-primary)] disabled:opacity-60"
-              }`}
-            >
-              {submitted ? t.contact.success : loading ? t.contact.sending : t.contact.send}
-              {submitted ? (
-                <Check size={16} aria-hidden="true" />
-              ) : loading ? (
-                <Loader2 size={16} aria-hidden="true" className="animate-spin motion-reduce:animate-none" />
-              ) : (
-                <Send
-                  size={16}
-                  aria-hidden="true"
-                  className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                />
-              )}
-            </button>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button
+                type="submit"
+                className={`magnetic-button group relative flex min-h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-full px-5 py-3.5 text-center text-sm font-bold text-black transition-[background-color,box-shadow,transform] hover:shadow-lg hover:shadow-[var(--color-primary)]/25 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-primary)] active:scale-[0.98] sm:w-auto sm:px-8 ${
+                  done ? "bg-[#25d366]" : "bg-[var(--color-primary)]"
+                }`}
+              >
+                {done ? t.contact.success : t.contact.send}
+                {done ? (
+                  <Check size={16} aria-hidden="true" />
+                ) : (
+                  <Send
+                    size={16}
+                    aria-hidden="true"
+                    className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                  />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleWhatsApp}
+                className="group flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-[#25d366]/40 px-5 py-3 text-sm font-semibold text-[#25d366] transition-colors hover:bg-[#25d366]/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#25d366] sm:w-auto sm:px-6"
+              >
+                <MessageCircle size={16} aria-hidden="true" />
+                {copy.viaWhatsApp}
+              </button>
+            </div>
           </form>
 
           <div
@@ -396,10 +309,10 @@ export default function Contact() {
                 <div className="min-w-0">
                   <h3 className="text-sm font-semibold">Email</h3>
                   <a
-                    href="mailto:gabweb95@gmail.com"
+                    href={`mailto:${EMAIL}`}
                     className="break-all text-sm text-[var(--color-muted)] transition-colors hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)]"
                   >
-                    gabweb95@gmail.com
+                    {EMAIL}
                   </a>
                 </div>
               </div>
@@ -424,7 +337,7 @@ export default function Contact() {
             </div>
 
             <a
-              href="https://wa.me/5551989125407?text=Ol%C3%A1%2C%20gostaria%20de%20um%20or%C3%A7amento"
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(copy.wa)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="group flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-[#25d366]/30 bg-[#25d366]/8 px-5 py-4 font-semibold text-[#25d366] transition-[background-color,transform] hover:bg-[#25d366]/15 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#25d366] motion-safe:hover:-translate-y-0.5"

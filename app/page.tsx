@@ -6,6 +6,7 @@ import Services from "./components/Services";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import PageLoader from "./components/PageLoader";
+import Experience from "./components/Experience";
 
 export default function Home() {
   return (
@@ -20,6 +21,7 @@ export default function Home() {
       <main id="conteudo" className="relative z-10">
         <Hero />
         <About />
+        <Experience />
         <Services />
         <Contact />
       </main>

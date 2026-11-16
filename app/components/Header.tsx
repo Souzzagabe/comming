@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties } from "re
 import { ArrowUpRight } from "lucide-react";
 import { useI18n } from "@/app/contexts/i18n-context";
 
-const SECTION_IDS = ["home", "sobre", "servicos", "contato"] as const;
+const SECTION_IDS = ["home", "sobre", "experiencia", "servicos", "contato"] as const;
 const FOCUSABLE = "a[href], button:not([disabled])";
 
 const vars = (v: Record<string, string | number>) => v as CSSProperties;
@@ -35,6 +35,7 @@ export default function Header() {
   const navLinks = [
     { href: "#home", label: t.nav.home },
     { href: "#sobre", label: t.nav.about },
+    { href: "#experiencia", label: isPt ? "Experiência" : "Experience" },
     { href: "#servicos", label: t.nav.services },
     { href: "#contato", label: t.nav.contact },
   ];

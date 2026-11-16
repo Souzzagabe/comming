@@ -1,119 +1,144 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import { useRef } from "react";
+import { useI18n } from "@/app/contexts/i18n-context";
 
-type Skill = {
-  name: string;
-  level: number; // 0-100
-  tag: "Avançado" | "Intermediário";
+type Lang = "pt" | "en";
+type Text = Record<Lang, string>;
+
+type Group = {
+  title: Text;
+  note: Text;
+  items: { name: string; core?: boolean }[];
 };
 
-const categories: { title: string; skills: Skill[] }[] = [
+/**
+ * Sem barras de porcentagem: números "de nível" não são verificáveis e
+ * recrutadores desconfiam deles. Em vez disso, o destaque (core) marca o que
+ * aparece no dia a dia das experiências profissionais.
+ */
+const GROUPS: Group[] = [
   {
-    title: "Frontend",
-    skills: [
-      { name: "Next.js / React", level: 95, tag: "Avançado" },
-      { name: "Angular", level: 88, tag: "Avançado" },
-      { name: "TypeScript", level: 92, tag: "Avançado" },
-      { name: "Tailwind CSS", level: 90, tag: "Avançado" },
-      { name: "Styled Components", level: 85, tag: "Avançado" },
-      { name: "Material UI / Chakra UI", level: 85, tag: "Avançado" },
-      { name: "GSAP / Framer Motion", level: 80, tag: "Avançado" },
-      { name: "SVG & Animações", level: 82, tag: "Avançado" },
+    title: { pt: "Frontend", en: "Frontend" },
+    note: {
+      pt: "Interfaces responsivas, componentizadas e performáticas.",
+      en: "Responsive, componentized, performant interfaces.",
+    },
+    items: [
+      { name: "React", core: true },
+      { name: "Next.js", core: true },
+      { name: "TypeScript", core: true },
+      { name: "Angular", core: true },
+      { name: "JavaScript", core: true },
+      { name: "Tailwind CSS" },
+      { name: "Styled Components" },
+      { name: "Material UI" },
+      { name: "GSAP" },
+      { name: "Framer Motion" },
+      { name: "HTML & CSS" },
     ],
   },
   {
-    title: "Backend",
-    skills: [
-      { name: "Node.js", level: 85, tag: "Avançado" },
-      { name: "PHP", level: 75, tag: "Intermediário" },
-      { name: "APIs REST", level: 90, tag: "Avançado" },
-      { name: "Banco de Dados", level: 78, tag: "Intermediário" },
+    title: { pt: "Backend & Dados", en: "Backend & Data" },
+    note: {
+      pt: "Integração de APIs e persistência em bancos relacionais e não relacionais.",
+      en: "API integration and persistence on relational and non-relational databases.",
+    },
+    items: [
+      { name: "Node.js", core: true },
+      { name: "Express.js", core: true },
+      { name: "APIs REST", core: true },
+      { name: "Java" },
+      { name: "PHP" },
+      { name: "WordPress" },
+      { name: "SQL" },
+      { name: "NoSQL" },
+      { name: "PostgreSQL" },
     ],
   },
   {
-    title: "Ferramentas & Testes",
-    skills: [
-      { name: "Git / GitHub", level: 90, tag: "Avançado" },
-      { name: "Jest", level: 80, tag: "Avançado" },
-      { name: "Docker", level: 65, tag: "Intermediário" },
-      { name: "Figma", level: 72, tag: "Intermediário" },
-      { name: "CI/CD", level: 70, tag: "Intermediário" },
+    title: { pt: "Qualidade & Processo", en: "Quality & Process" },
+    note: {
+      pt: "Entrega contínua, testes e trabalho em equipe multidisciplinar.",
+      en: "Continuous delivery, testing and cross-functional teamwork.",
+    },
+    items: [
+      { name: "Jest", core: true },
+      { name: "Git / GitHub", core: true },
+      { name: "Scrum", core: true },
+      { name: "TDD" },
+      { name: "CI/CD" },
+      { name: "Docker" },
+      { name: "RPA" },
+      { name: "UI/UX" },
+      { name: "Figma" },
     ],
   },
 ];
 
-function SkillBar({ skill, delay }: { skill: Skill; delay: number }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true });
-
-  return (
-    <div ref={ref} className="space-y-2">
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-[var(--color-foreground)]">{skill.name}</span>
-        <span
-          className={`text-xs px-2 py-0.5 rounded-full ${
-            skill.tag === "Avançado"
-              ? "bg-[var(--color-primary)]/10 text-[var(--color-primary-light)]"
-              : "bg-[var(--color-accent)]/10 text-[var(--color-accent)]"
-          }`}
-        >
-          {skill.tag}
-        </span>
-      </div>
-      <div className="h-2 rounded-full bg-[var(--color-border)] overflow-hidden">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={inView ? { width: `${skill.level}%` } : {}}
-          transition={{ duration: 1, delay, ease: "easeOut" }}
-          className="h-full rounded-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)]"
-        />
-      </div>
-    </div>
-  );
-}
-
 export default function Skills() {
+  const { locale } = useI18n();
+  const lang: Lang = locale === "pt" ? "pt" : "en";
+  const isPt = lang === "pt";
+
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const reduce = useReducedMotion();
+
+  const fade = (delay: number) => ({
+    initial: reduce ? false : { opacity: 0, y: 30 },
+    animate: inView || reduce ? { opacity: 1, y: 0 } : {},
+    transition: { duration: 0.6, delay },
+  });
 
   return (
-    <section id="habilidades" className="py-24 md:py-32 bg-[var(--color-card)]/50">
-      <div ref={ref} className="mx-auto max-w-6xl px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
-        >
+    <section
+      id="habilidades"
+      aria-labelledby="habilidades-title"
+      className="bg-[var(--color-card)]/50 py-16 sm:py-20 md:py-32"
+    >
+      <div ref={ref} className="mx-auto max-w-6xl px-4 sm:px-8">
+        <motion.div {...fade(0)}>
           <span className="text-sm font-medium text-[var(--color-primary-light)]">
-            Habilidades
+            {isPt ? "Habilidades" : "Skills"}
           </span>
-          <h2 className="mt-2 text-3xl md:text-4xl font-bold">
-            Meu arsenal técnico
+          <h2 id="habilidades-title" className="mt-2 text-3xl font-bold md:text-4xl">
+            {isPt ? "Meu arsenal técnico" : "My technical toolkit"}
           </h2>
+          <p className="mt-4 flex items-center gap-2 text-sm text-[var(--color-muted)]">
+            <span
+              className="size-2 rounded-full bg-[var(--color-primary)]"
+              aria-hidden="true"
+            />
+            {isPt ? "Destacadas: uso diário em projetos profissionais" : "Highlighted: daily use in professional projects"}
+          </p>
         </motion.div>
 
-        <div className="mt-14 grid gap-12 md:grid-cols-3">
-          {categories.map((cat, ci) => (
-            <motion.div
-              key={cat.title}
-              initial={{ opacity: 0, y: 40 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.15 * ci }}
-            >
-              <h3 className="text-lg font-semibold mb-6 text-[var(--color-foreground)]">
-                {cat.title}
+        <div className="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
+          {GROUPS.map((group, i) => (
+            <motion.div key={group.title.en} {...fade(0.12 * (i + 1))}>
+              <h3 className="text-lg font-semibold text-[var(--color-foreground)]">
+                {group.title[lang]}
               </h3>
-              <div className="space-y-5">
-                {cat.skills.map((skill, si) => (
-                  <SkillBar
-                    key={skill.name}
-                    skill={skill}
-                    delay={0.1 * si + 0.2}
-                  />
+              <p className="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">
+                {group.note[lang]}
+              </p>
+
+              <ul className="mt-5 flex flex-wrap gap-2">
+                {group.items.map((item) => (
+                  <li
+                    key={item.name}
+                    className={`skill-chip rounded-full border px-3 py-1.5 font-mono text-xs ${
+                      item.core
+                        ? "border-[var(--color-primary)]/40 bg-[var(--color-primary)]/10 text-[var(--color-foreground)]"
+                        : "border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-muted)]"
+                    }`}
+                  >
+                    {item.name}
+                  </li>
                 ))}
-              </div>
+              </ul>
             </motion.div>
           ))}
         </div>
