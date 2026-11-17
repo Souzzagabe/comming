@@ -250,7 +250,7 @@ export default function Header() {
               ))}
             </div>
 
-            <a href="#contato" className="site-cta hidden items-center gap-1.5 md:inline-flex">
+            <a href="#contato" className="site-cta hidden items-center gap-1.5 lg:inline-flex">
               {t.nav.hire}
               <ArrowUpRight size={16} aria-hidden="true" />
             </a>

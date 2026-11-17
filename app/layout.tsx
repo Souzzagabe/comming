@@ -18,11 +18,6 @@ export const metadata: Metadata = {
   title: "Souzzagabe | Desenvolvedor Fullstack",
   description:
     "Desenvolvedor Fullstack com foco em Frontend. Especialista em Next.js, Angular, Node.js e PHP. Criação de interfaces modernas, responsivas e performáticas.",
-  icons: {
-    icon: "/favicon.png",
-    shortcut: "/favicon.png",
-    apple: "/favicon.png",
-  },
   keywords: [
     "desenvolvedor fullstack",
     "frontend",

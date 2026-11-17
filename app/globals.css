@@ -1945,6 +1945,135 @@ body.page-ready .site-header {
   }
 }
 
+/* ─── Experiência (linha do tempo) ─── */
+.exp-line {
+  position: absolute;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  left: 6px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--color-border);
+}
+
+.exp-line-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--color-primary),
+    color-mix(in srgb, var(--color-primary) 25%, transparent)
+  );
+  transform-origin: top;
+}
+
+/* a linha "se desenha" conforme você rola (CSS puro; sem suporte, aparece cheia) */
+@supports (animation-timeline: view()) {
+  .exp-line-fill {
+    animation: exp-line linear both;
+    animation-timeline: view();
+    animation-range: entry 10% cover 55%;
+  }
+}
+
+@keyframes exp-line {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+.exp-dot {
+  position: absolute;
+  top: 1.6rem;
+  left: -2.25rem;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-primary);
+  border-radius: 50%;
+  background: var(--color-surface, #0b0b0c);
+}
+
+@media (min-width: 640px) {
+  .exp-dot {
+    left: -3rem;
+  }
+}
+
+.exp-dot-current {
+  background: var(--color-primary);
+  animation: exp-pulse 2.4s ease-out infinite;
+}
+
+@keyframes exp-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(242 201 19 / 45%);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 10px rgb(242 201 19 / 0%);
+  }
+}
+
+.exp-more summary::-webkit-details-marker {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exp-dot-current {
+    animation: none;
+  }
+}
+
+/* ─── Botão flutuante de WhatsApp ─── */
+.whatsapp-fab {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 45;
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: #25d366;
+  color: #04210f;
+  box-shadow:
+    0 10px 24px -8px rgb(0 0 0 / 55%),
+    0 0 0 1px rgb(255 255 255 / 12%) inset;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, 16px, 0) scale(0.9);
+  transition:
+    opacity 300ms ease,
+    transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.whatsapp-fab[data-visible="true"] {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.whatsapp-fab:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .whatsapp-fab[data-visible="true"]:hover {
+    transform: translate3d(0, -2px, 0) scale(1.06);
+  }
+}
+
+@media (scripting: none) {
+  .whatsapp-fab {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+}
+
 /* ─── About ─── */
 .about-card {
   position: relative;
@@ -2005,7 +2134,8 @@ body.page-ready .site-header {
 @supports (animation-timeline: view()) {
   .about-reveal,
   .services-reveal,
-  .contact-reveal {
+  .contact-reveal,
+  .experience-reveal {
     animation: about-reveal linear both;
     animation-timeline: view();
     animation-range: entry calc(var(--i, 0) * 3%) entry calc(45% + var(--i, 0) * 3%);
@@ -2106,210 +2236,10 @@ body.page-ready .site-header {
   .about-reveal,
   .services-reveal,
   .contact-reveal,
+  .experience-reveal,
   .about-ring-arc {
     animation: none;
     opacity: 1;
     transform: none;
   }
-}
-
-/* ─── Experience (linha do tempo) ─── */
-.experience-list {
-  position: relative;
-}
-
-/* trilho + preenchimento que cresce com o scroll (só em telas largas) */
-@media (min-width: 768px) {
-  .experience-list::before,
-  .experience-list::after {
-    position: absolute;
-    top: 0.75rem;
-    bottom: 0.75rem;
-    left: 11px;
-    width: 1px;
-    content: "";
-  }
-
-  .experience-list::before {
-    background: var(--color-border);
-  }
-
-  .experience-list::after {
-    background: linear-gradient(to bottom, var(--color-primary), color-mix(in srgb, var(--color-primary) 20%, transparent));
-    transform-origin: top;
-  }
-}
-
-@supports (animation-timeline: view()) {
-  .experience-list::after {
-    animation: experience-fill linear both;
-    animation-timeline: view();
-    animation-range: entry 20% cover 70%;
-  }
-}
-
-@keyframes experience-fill {
-  from {
-    transform: scaleY(0);
-  }
-  to {
-    transform: scaleY(1);
-  }
-}
-
-.experience-dot {
-  position: absolute;
-  top: 1.75rem;
-  left: 0;
-  display: none;
-  width: 23px;
-  height: 23px;
-  place-items: center;
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  background: var(--color-background);
-}
-
-@media (min-width: 768px) {
-  .experience-dot {
-    display: grid;
-  }
-}
-
-.experience-dot span {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--color-muted);
-}
-
-/* vaga atual: ponto amarelo com pulso suave */
-.experience-dot[data-current="true"] {
-  border-color: color-mix(in srgb, var(--color-primary) 60%, var(--color-border));
-}
-
-.experience-dot[data-current="true"] span {
-  position: relative;
-  background: var(--color-primary);
-}
-
-.experience-dot[data-current="true"] span::after {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: var(--color-primary);
-  content: "";
-  animation: experience-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-@keyframes experience-ping {
-  0% {
-    opacity: 0.55;
-    transform: scale(1);
-  }
-  80%,
-  100% {
-    opacity: 0;
-    transform: scale(3.2);
-  }
-}
-
-.experience-tech {
-  transition:
-    border-color 200ms ease,
-    color 200ms ease;
-}
-
-.experience-tech:hover {
-  border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border));
-  color: var(--color-foreground);
-}
-
-/* ─── Skills ─── */
-.skill-chip {
-  transition:
-    border-color 200ms ease,
-    background-color 200ms ease,
-    color 200ms ease;
-}
-
-.skill-chip:hover {
-  border-color: color-mix(in srgb, var(--color-primary) 60%, var(--color-border));
-  color: var(--color-foreground);
-}
-
-/* ─── Contact: verificação de humano (local, sem serviço externo) ─── */
-.contact-human {
-  transition:
-    border-color 200ms ease,
-    background-color 200ms ease;
-}
-
-.contact-human:hover,
-.contact-human:has(input:checked) {
-  border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border));
-}
-
-.contact-human:has(input:focus-visible) {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 3px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .experience-list::after {
-    animation: none;
-    transform: none;
-  }
-
-  .experience-dot[data-current="true"] span::after {
-    animation: none;
-    opacity: 0;
-  }
-}
-
-/* ─── Solutions: AI-assisted development workflow ─── */
-.services-ai-flow {
-  position: relative;
-  margin: 1.25rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.services-ai-step {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding-bottom: 0.9rem;
-  font-size: 0.875rem;
-  color: var(--color-foreground);
-}
-
-.services-ai-step:last-child {
-  padding-bottom: 0;
-}
-
-/* conector vertical entre os passos */
-.services-ai-step:not(:last-child)::before {
-  position: absolute;
-  top: 1.6rem;
-  bottom: 0.1rem;
-  left: 0.75rem;
-  width: 1px;
-  background: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
-  content: "";
-}
-
-.services-ai-num {
-  display: grid;
-  flex-shrink: 0;
-  width: 1.5rem;
-  height: 1.5rem;
-  place-items: center;
-  border: 1px solid color-mix(in srgb, var(--color-primary) 45%, transparent);
-  border-radius: 999px;
-  background: var(--color-card);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.6875rem;
-  color: var(--color-primary);
 }
