@@ -3,6 +3,7 @@ import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { MotionConfig } from "framer-motion";
 import "./globals.css";
 import { I18nProvider } from "./contexts/i18n-context";
+import CookieConsent from "./components/CookieConsent";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -51,7 +52,10 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <MotionConfig reducedMotion="user">
-          <I18nProvider>{children}</I18nProvider>
+          <I18nProvider>
+            {children}
+            <CookieConsent />
+          </I18nProvider>
         </MotionConfig>
       </body>
     </html>

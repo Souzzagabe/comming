@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUp, ArrowUpRight, Github, Instagram, Linkedin, Mail, MessageCircle } from "lucide-react";
+import Link from "next/link";
 import { useI18n } from "@/app/contexts/i18n-context";
 
 const EMAIL = "gabweb95@gmail.com";
@@ -121,6 +122,13 @@ export default function Footer() {
               @souzzagabe
               <span className="sr-only"> {newTab}</span>
             </a>
+            <span aria-hidden="true"> · </span>
+            <Link
+              href="/politica-de-cookies"
+              className="rounded-sm font-medium hover:text-[var(--color-primary)] hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-primary)]"
+            >
+              {t.footer.cookie_policy}
+            </Link>
           </p>
 
           <a

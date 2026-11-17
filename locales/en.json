@@ -98,6 +98,33 @@
   },
   "footer": {
     "rights": "All rights reserved.",
-    "made_with": "Designed and developed with Next.js & Tailwind CSS"
+    "made_with": "Designed and developed with Next.js & Tailwind CSS",
+    "cookie_policy": "Cookie Policy"
+  },
+  "cookieConsent": {
+    "region": "Cookie preferences",
+    "message": "We use browser storage to remember your preferences. Choose whether to accept or reject optional cookies.",
+    "policy": "Cookie Policy",
+    "accept": "Accept cookies",
+    "reject": "Reject optional cookies",
+    "storageError": "Your preference could not be saved. Check your browser settings and try again."
+  },
+  "cookiePolicy": {
+    "eyebrow": "Privacy",
+    "title": "Cookie Policy",
+    "intro": "This page explains which storage technologies this website uses, why they are used, and how you can manage them.",
+    "updated": "Last updated",
+    "whatAreTitle": "Cookies and browser storage",
+    "whatAreBody": "Cookies are small files stored by your browser. This website also uses local storage (localStorage) and session storage (sessionStorage), which are different technologies, but are described here for transparency about how the website works.",
+    "currentUseTitle": "What we currently use",
+    "currentUseBody": "localStorage saves your choice in the cookie notice (accept or reject), so it does not appear again on future visits. sessionStorage records whether the loading animation has already appeared during that browser session. This data is functional: it is not used for advertising, browsing analytics, or cross-site tracking. The website currently does not use optional advertising or analytics cookies.",
+    "choicesTitle": "Managing your choice",
+    "choicesBody": "You can accept or reject optional cookies in the notice. Your choice is saved in your browser; since this website has no active optional advertising or analytics cookies, it only records your preference and does not enable third-party tracking. To delete or change stored data, clear this website's data in your browser settings. If optional technologies are added in the future, this policy and notice will be updated before they are used.",
+    "thirdPartiesTitle": "Third-party services",
+    "thirdPartiesBody": "The website may link to external services such as WhatsApp, social networks, and email. When you visit them, those services may use their own storage technologies, governed by their respective privacy policies. We do not control data collected by those third parties.",
+    "contactTitle": "Controller and contact",
+    "contactBody": "This website is operated by Gabriel de Souza. For questions or requests related to this policy and the processing of personal data, contact gabweb95@gmail.com.",
+    "backToSite": "Back to website",
+    "disclaimer": "This policy describes the technologies identified in the current version of the website and is not a substitute for specific legal advice. Practices should be reviewed if new cookies, analytics tools, or third-party services are added."
   }
 }

@@ -171,12 +171,18 @@ export default function Services() {
               </p>
 
               <ol
-                className="services-ai-flow mt-5"
+                className="services-ai-flow mt-5 grid gap-2"
                 aria-label={isPt ? "Fluxo de trabalho" : "Workflow"}
               >
                 {aiFlow.map((step, i) => (
-                  <li key={step.en} className="services-ai-step">
-                    <span className="services-ai-num" aria-hidden="true">
+                  <li
+                    key={step.en}
+                    className="services-ai-step flex items-center gap-3 text-sm text-[var(--color-foreground)]"
+                  >
+                    <span
+                      className="services-ai-num inline-flex size-6 shrink-0 items-center justify-center rounded-full border border-[var(--color-primary)]/50 font-mono text-xs font-semibold text-[var(--color-primary)]"
+                      aria-hidden="true"
+                    >
                       {i + 1}
                     </span>
                     {step[locale]}

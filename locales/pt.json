@@ -98,6 +98,33 @@
   },
   "footer": {
     "rights": "Todos os direitos reservados.",
-    "made_with": "Projetado e desenvolvido com Next.js & Tailwind CSS"
+    "made_with": "Projetado e desenvolvido com Next.js & Tailwind CSS",
+    "cookie_policy": "Política de Cookies"
+  },
+  "cookieConsent": {
+    "region": "Preferências de cookies",
+    "message": "Usamos recursos de armazenamento do navegador para lembrar suas preferências. Escolha se aceita ou recusa cookies opcionais.",
+    "policy": "Política de Cookies",
+    "accept": "Aceitar cookies",
+    "reject": "Recusar opcionais",
+    "storageError": "Não foi possível salvar sua preferência. Verifique as configurações do navegador e tente novamente."
+  },
+  "cookiePolicy": {
+    "eyebrow": "Privacidade",
+    "title": "Política de Cookies",
+    "intro": "Esta página explica quais tecnologias de armazenamento são usadas neste site, para que servem e como você pode gerenciá-las.",
+    "updated": "Atualizada em",
+    "whatAreTitle": "Cookies e armazenamento do navegador",
+    "whatAreBody": "Cookies são pequenos arquivos armazenados pelo navegador. Este site também usa armazenamento local (localStorage) e de sessão (sessionStorage), que são tecnologias diferentes de cookies, mas são descritas aqui para dar transparência sobre o funcionamento do site.",
+    "currentUseTitle": "O que usamos atualmente",
+    "currentUseBody": "O localStorage guarda sua escolha no aviso de cookies (aceitar ou recusar), para que ele não apareça novamente em visitas futuras. O sessionStorage registra se a animação de carregamento já foi exibida naquela sessão do navegador. Esses dados são funcionais: não são usados para publicidade, análise de navegação ou rastreamento entre sites. Atualmente, o site não utiliza cookies opcionais de publicidade ou analytics.",
+    "choicesTitle": "Como gerenciar sua escolha",
+    "choicesBody": "Você pode aceitar ou recusar cookies opcionais no aviso. A escolha fica salva no navegador; como não há cookies opcionais de publicidade ou analytics ativos neste site, ela apenas registra sua preferência e não habilita rastreamento de terceiros. Para apagar ou alterar os dados armazenados, limpe os dados deste site nas configurações do navegador. Se tecnologias opcionais forem adicionadas no futuro, esta política e o aviso serão atualizados antes de seu uso.",
+    "thirdPartiesTitle": "Serviços de terceiros",
+    "thirdPartiesBody": "O site pode conter links para serviços externos, como WhatsApp, redes sociais e e-mail. Ao acessá-los, esses serviços podem usar suas próprias tecnologias de armazenamento, regidas pelas respectivas políticas de privacidade. Não controlamos os dados coletados por esses terceiros.",
+    "contactTitle": "Controlador e contato",
+    "contactBody": "O responsável por este site é Gabriel de Souza. Para dúvidas ou solicitações relacionadas a esta política e ao tratamento de dados pessoais, entre em contato pelo e-mail gabweb95@gmail.com.",
+    "backToSite": "Voltar ao site",
+    "disclaimer": "Esta política descreve os recursos identificados na versão atual do site e não substitui uma análise jurídica específica. As práticas devem ser revistas caso sejam adicionados novos cookies, ferramentas de análise ou serviços de terceiros."
   }
 }
