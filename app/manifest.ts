@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 
 // Gera /manifest.webmanifest (ícone na tela inicial do celular). 100% estático.
+export const dynamic = "force-static";
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Gabriel de Souza — Desenvolvedor Full Stack",
